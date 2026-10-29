@@ -1,0 +1,201 @@
+feedback_id,store_id,store,date,rating,theme
+F001,S01,Mumbai,2026-06-12,3,Freshness
+F002,S01,Mumbai,2026-04-04,5,Pricing
+F003,S01,Mumbai,2026-04-21,3,Queue time
+F004,S01,Mumbai,2026-06-02,5,Queue time
+F005,S01,Mumbai,2026-04-05,4,Queue time
+F006,S01,Mumbai,2026-05-11,4,Staff behaviour
+F007,S01,Mumbai,2026-04-24,4,Queue time
+F008,S01,Mumbai,2026-06-21,,Queue time
+F009,S01,Mumbai,2026-05-31,3,Queue time
+F010,S01,Mumbai,2026-05-05,3,Freshness
+F011,S01,Mumbai,2026-04-07,5,Freshness
+F012,S01,Mumbai,2026-05-26,5,Staff behaviour
+F013,S01,Mumbai,2026-05-29,5,Queue time
+F014,S01,Mumbai,2026-05-31,5,Queue time
+F015,S01,Mumbai,2026-06-01,1,Pricing
+F016,S01,Mumbai,2026-05-20,4,Freshness
+F017,S01,Mumbai,2026-05-19,4,Freshness
+F018,S01,Mumbai,2026-05-27,3,Queue time
+F019,S01,Mumbai,2026-06-11,3,Stock availability
+F020,S01,Mumbai,2026-06-16,3,Pricing
+F021,S01,Mumbai,2026-05-15,5,Staff behaviour
+F022,S01,Mumbai,2026-04-12,4,Queue time
+F023,S01,Mumbai,2026-06-07,4,Staff behaviour
+F024,S01,Mumbai,2026-05-19,4,Pricing
+F025,S01,Mumbai,2026-05-19,4,Queue time
+F026,S01,Mumbai,2026-05-26,2,Queue time
+F027,S01,Mumbai,2026-04-05,3,Queue time
+F028,S01,Mumbai,2026-06-04,5,Pricing
+F029,S01,Mumbai,2026-05-19,5,Stock availability
+F030,S01,Mumbai,2026-04-17,5,Staff behaviour
+F031,S01,Mumbai,2026-06-10,5,Staff behaviour
+F032,S01,Mumbai,2026-05-11,5,Queue time
+F033,S01,Mumbai,2026-04-23,4,Staff behaviour
+F034,S01,Mumbai,2026-04-16,,Staff behaviour
+F035,S01,Mumbai,2026-06-14,4,Queue time
+F036,S01,Mumbai,2026-04-25,4,Queue time
+F037,S01,Mumbai,2026-06-26,4,Pricing
+F038,S01,Mumbai,2026-04-20,2,Freshness
+F039,S01,Mumbai,2026-06-02,5,Queue time
+F040,S01,Mumbai,2026-04-17,5,Freshness
+F041,S02,Pune,2026-05-02,4,Stock availability
+F042,S02,Pune,2026-05-11,4,Queue time
+F043,S02,Pune,2026-05-14,5,Pricing
+F044,S02,Pune,2026-04-28,5,Pricing
+F045,S02,Pune,2026-04-19,5,Pricing
+F046,S02,Pune,2026-06-11,3,Stock availability
+F047,S02,Pune,2026-04-11,2,Queue time
+F048,S02,Pune,2026-05-31,2,Queue time
+F049,S02,Pune,2026-06-23,3,Pricing
+F050,S02,Pune,2026-05-08,3,Pricing
+F051,S02,Pune,2026-05-12,2,Stock availability
+F052,S02,Pune,2026-04-01,2,Pricing
+F053,S02,Pune,2026-04-04,5,Stock availability
+F054,S02,Pune,2026-05-31,3,Stock availability
+F055,S02,Pune,2026-06-20,3,Freshness
+F056,S02,Pune,2026-04-24,4,Pricing
+F057,S02,Pune,2026-06-04,2,Freshness
+F058,S02,Pune,2026-05-30,3,Pricing
+F059,S02,Pune,2026-04-12,,Freshness
+F060,S02,Pune,2026-04-19,1,Pricing
+F061,S02,Pune,2026-06-15,4,Pricing
+F062,S02,Pune,2026-05-05,5,Stock availability
+F063,S02,Pune,2026-06-13,5,Staff behaviour
+F064,S02,Pune,2026-06-09,5,Pricing
+F065,S02,Pune,2026-04-12,5,Pricing
+F066,S02,Pune,2026-05-10,4,Pricing
+F067,S02,Pune,2026-06-26,4,Pricing
+F068,S02,Pune,2026-06-19,4,Staff behaviour
+F069,S02,Pune,2026-05-09,5,Pricing
+F070,S02,Pune,2026-06-10,3,Pricing
+F071,S02,Pune,2026-05-04,4,Queue time
+F072,S02,Pune,2026-06-20,,Freshness
+F073,S02,Pune,2026-05-23,4,Pricing
+F074,S02,Pune,2026-05-22,1,Pricing
+F075,S02,Pune,2026-05-18,5,Pricing
+F076,S02,Pune,2026-06-24,4,Pricing
+F077,S02,Pune,2026-06-17,4,Freshness
+F078,S02,Pune,2026-05-27,4,Queue time
+F079,S02,Pune,2026-04-16,5,Freshness
+F080,S02,Pune,2026-05-25,5,Stock availability
+F081,S03,Hyderabad,2026-05-12,3,Pricing
+F082,S03,Hyderabad,2026-06-25,3,Freshness
+F083,S03,Hyderabad,2026-05-28,2,Stock availability
+F084,S03,Hyderabad,2026-05-13,1,Stock availability
+F085,S03,Hyderabad,2026-05-30,2,Staff behaviour
+F086,S03,Hyderabad,2026-05-04,1,Stock availability
+F087,S03,Hyderabad,2026-04-13,5,Queue time
+F088,S03,Hyderabad,2026-04-14,2,Stock availability
+F089,S03,Hyderabad,2026-06-08,2,Stock availability
+F090,S03,Hyderabad,2026-06-03,2,Pricing
+F091,S03,Hyderabad,2026-05-18,,Queue time
+F092,S03,Hyderabad,2026-04-25,5,Stock availability
+F093,S03,Hyderabad,2026-04-19,4,Freshness
+F094,S03,Hyderabad,2026-04-03,1,Freshness
+F095,S03,Hyderabad,2026-05-03,3,Stock availability
+F096,S03,Hyderabad,2026-06-27,4,Pricing
+F097,S03,Hyderabad,2026-04-04,1,Stock availability
+F098,S03,Hyderabad,2026-06-03,2,Stock availability
+F099,S03,Hyderabad,2026-05-07,5,Stock availability
+F100,S03,Hyderabad,2026-06-28,4,Stock availability
+F101,S03,Hyderabad,2026-06-23,5,Pricing
+F102,S03,Hyderabad,2026-05-07,1,Stock availability
+F103,S03,Hyderabad,2026-05-29,2,Stock availability
+F104,S03,Hyderabad,2026-06-27,1,Staff behaviour
+F105,S03,Hyderabad,2026-05-09,,Stock availability
+F106,S03,Hyderabad,2026-05-10,1,Freshness
+F107,S03,Hyderabad,2026-04-25,2,Stock availability
+F108,S03,Hyderabad,2026-05-01,2,Staff behaviour
+F109,S03,Hyderabad,2026-04-19,4,Pricing
+F110,S03,Hyderabad,2026-06-25,2,Stock availability
+F111,S03,Hyderabad,2026-06-06,3,Stock availability
+F112,S03,Hyderabad,2026-06-08,4,Queue time
+F113,S03,Hyderabad,2026-05-15,4,Stock availability
+F114,S03,Hyderabad,2026-06-14,5,Stock availability
+F115,S03,Hyderabad,2026-05-26,2,Stock availability
+F116,S03,Hyderabad,2026-06-26,3,Staff behaviour
+F117,S03,Hyderabad,2026-04-05,2,Stock availability
+F118,S03,Hyderabad,2026-05-08,1,Staff behaviour
+F119,S03,Hyderabad,2026-06-02,3,Queue time
+F120,S03,Hyderabad,2026-06-28,1,Stock availability
+F121,S04,Bengaluru,2026-04-15,,Stock availability
+F122,S04,Bengaluru,2026-05-13,4,Pricing
+F123,S04,Bengaluru,2026-05-22,3,Pricing
+F124,S04,Bengaluru,2026-04-16,1,Stock availability
+F125,S04,Bengaluru,2026-05-19,5,Freshness
+F126,S04,Bengaluru,2026-04-09,3,Staff behaviour
+F127,S04,Bengaluru,2026-04-13,3,Stock availability
+F128,S04,Bengaluru,2026-06-06,4,Queue time
+F129,S04,Bengaluru,2026-06-19,5,Staff behaviour
+F130,S04,Bengaluru,2026-06-11,5,Queue time
+F131,S04,Bengaluru,2026-05-27,4,Stock availability
+F132,S04,Bengaluru,2026-04-23,5,Pricing
+F133,S04,Bengaluru,2026-05-14,4,Pricing
+F134,S04,Bengaluru,2026-05-29,,Freshness
+F135,S04,Bengaluru,2026-05-09,4,Queue time
+F136,S04,Bengaluru,2026-06-07,5,Freshness
+F137,S04,Bengaluru,2026-04-27,5,Stock availability
+F138,S04,Bengaluru,2026-04-15,4,Queue time
+F139,S04,Bengaluru,2026-05-29,5,Freshness
+F140,S04,Bengaluru,2026-06-11,4,Pricing
+F141,S04,Bengaluru,2026-06-29,4,Queue time
+F142,S04,Bengaluru,2026-04-28,3,Queue time
+F143,S04,Bengaluru,2026-06-16,4,Staff behaviour
+F144,S04,Bengaluru,2026-04-05,4,Pricing
+F145,S04,Bengaluru,2026-06-13,4,Freshness
+F146,S04,Bengaluru,2026-06-21,1,Queue time
+F147,S04,Bengaluru,2026-06-20,1,Pricing
+F148,S04,Bengaluru,2026-04-16,5,Queue time
+F149,S04,Bengaluru,2026-06-02,3,Freshness
+F150,S04,Bengaluru,2026-05-16,4,Pricing
+F151,S04,Bengaluru,2026-06-14,5,Freshness
+F152,S04,Bengaluru,2026-06-08,,Freshness
+F153,S04,Bengaluru,2026-06-05,3,Freshness
+F154,S04,Bengaluru,2026-05-06,4,Pricing
+F155,S04,Bengaluru,2026-06-09,4,Queue time
+F156,S04,Bengaluru,2026-04-26,2,Stock availability
+F157,S04,Bengaluru,2026-06-03,4,Queue time
+F158,S04,Bengaluru,2026-05-08,4,Queue time
+F159,S04,Bengaluru,2026-04-23,4,Freshness
+F160,S04,Bengaluru,2026-05-20,4,Stock availability
+F161,S05,Ahmedabad,2026-05-03,2,Queue time
+F162,S05,Ahmedabad,2026-06-18,3,Stock availability
+F163,S05,Ahmedabad,2026-04-01,5,Freshness
+F164,S05,Ahmedabad,2026-06-27,4,Staff behaviour
+F165,S05,Ahmedabad,2026-05-29,4,Stock availability
+F166,S05,Ahmedabad,2026-06-04,3,Stock availability
+F167,S05,Ahmedabad,2026-05-30,,Pricing
+F168,S05,Ahmedabad,2026-06-14,5,Queue time
+F169,S05,Ahmedabad,2026-04-21,4,Stock availability
+F170,S05,Ahmedabad,2026-06-26,4,Freshness
+F171,S05,Ahmedabad,2026-05-09,5,Freshness
+F172,S05,Ahmedabad,2026-04-26,1,Pricing
+F173,S05,Ahmedabad,2026-06-12,3,Queue time
+F174,S05,Ahmedabad,2026-05-10,2,Stock availability
+F175,S05,Ahmedabad,2026-05-02,5,Queue time
+F176,S05,Ahmedabad,2026-04-14,3,Staff behaviour
+F177,S05,Ahmedabad,2026-06-04,1,Queue time
+F178,S05,Ahmedabad,2026-06-02,3,Queue time
+F179,S05,Ahmedabad,2026-05-09,,Stock availability
+F180,S05,Ahmedabad,2026-05-07,5,Queue time
+F181,S05,Ahmedabad,2026-05-02,5,Queue time
+F182,S05,Ahmedabad,2026-05-23,1,Freshness
+F183,S05,Ahmedabad,2026-06-17,4,Stock availability
+F184,S05,Ahmedabad,2026-05-12,2,Freshness
+F185,S05,Ahmedabad,2026-05-14,4,Freshness
+F186,S05,Ahmedabad,2026-04-08,2,Staff behaviour
+F187,S05,Ahmedabad,2026-06-17,3,Staff behaviour
+F188,S05,Ahmedabad,2026-05-30,5,Stock availability
+F189,S05,Ahmedabad,2026-05-16,3,Queue time
+F190,S05,Ahmedabad,2026-05-21,2,Stock availability
+F191,S05,Ahmedabad,2026-05-13,4,Stock availability
+F192,S05,Ahmedabad,2026-06-24,4,Queue time
+F193,S05,Ahmedabad,2026-06-16,4,Queue time
+F194,S05,Ahmedabad,2026-04-21,4,Queue time
+F195,S05,Ahmedabad,2026-05-16,2,Staff behaviour
+F196,S05,Ahmedabad,2026-04-26,,Queue time
+F197,S05,Ahmedabad,2026-06-28,2,Stock availability
+F198,S05,Ahmedabad,2026-04-14,2,Stock availability
+F199,S05,Ahmedabad,2026-06-25,3,Queue time
+F200,S05,Ahmedabad,2026-04-26,3,Pricing
