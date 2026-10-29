@@ -83,7 +83,7 @@ The following fields may be used to identify, filter, join, label, or group reco
 - `product`
 - `product_id`
 
-These are **keys and identifiers, not reportable metrics**. They must not be presented as measured business outcomes or counted among the 11 approved metrics.
+These fields may be used only as keys for filtering or grouping records. They are not reportable metrics and must never be returned or counted among the 11 approved metrics.
 
 ### Explicitly unapproved fields
 
