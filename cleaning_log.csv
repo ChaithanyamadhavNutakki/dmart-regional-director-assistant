@@ -1,9 +1,0 @@
-store,date,old_footfall,new_footfall,rule
-Hyderabad,2026-04-21,-150.0,,negative_to_missing
-Ahmedabad,2026-05-26,9800.0,2281.38,iqr_cap
-Mumbai,2026-04-09,6100.0,2986.0,iqr_cap
-Bengaluru,2026-06-10,,2065.0,median_impute
-Hyderabad,2026-04-21,,2216.0,median_impute
-Mumbai,2026-04-30,,2386.0,median_impute
-Pune,2026-04-12,,1509.5,median_impute
-Pune,2026-05-17,,1509.5,median_impute
