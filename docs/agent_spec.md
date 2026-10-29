@@ -98,17 +98,46 @@ A weather request combined with a one-store, one-date lookup or target check use
 
 The five recognised stores are Mumbai, Pune, Hyderabad, Bengaluru, and Ahmedabad.
 
-- Match an exact store name case-insensitively, with confidence `1.0`.
-- Treat `Bangalore` as an explicit alias for `Bengaluru`, with confidence `1.0`.
-- Use controlled fuzzy matching, such as `difflib.SequenceMatcher`, for eligible candidate words. The best similarity score becomes the store entity's confidence.
-- A fuzzy candidate must be at least five letters long and capitalised in the question or carry a possessive `'s`. It must not be the first word unless it carries `'s`, and must not be a keyword, stop word, recognised product word, or one of the brief's proper nouns.
-- The fuzzy-match examples that must work are `Bengalore` (0.78), `Bangalor` (0.71), `Punee` (0.89), `Hydrabad's` (0.94), and `Mumbay` (0.83). `Banglore` (0.59) must not resolve to a store.
-- Lowercase misspellings without a possessive are not fuzzy-matched. The lowercase words `pure`, `ahead`, `plunge`, `pane`, and `ahmed` must not be matched as stores.
-- A low-confidence candidate that appears to name a store must be preserved as an unresolved named store where the project rules require it. Do not silently discard a second unresolved store in a comparison or replace an unresolved named store with session context.
-- If a brand/persona proper noun from the brief carries `'s` or directly follows `for`, `about`, `in`, or `at`, and no store resolves elsewhere, treat it as an unresolved named store rather than silently taking a store from context.
-- The interpreter must distinguish a genuine unsupported question, such as `What is the capital of India?`, from a question that names a possible but unresolved store.
+### Fuzzy matching and unresolved stores
 
-An unresolved named store has confidence `0.4` and results in `Clarification Needed`, except where the intent itself has a higher-priority status under Section 7.
+Use `difflib.SequenceMatcher` or an equivalent deterministic method to compare candidate words with the five recognised store names. The best similarity score is the store entity's confidence.
+
+A candidate word must satisfy all of these conditions:
+
+- It has at least five letters.
+- It is capitalised in the question or carries a possessive `'s`.
+- It is not the first word of the question unless it carries `'s`.
+- It is neither an intent-rule keyword nor a stop word.
+- It is not one of the brief's proper nouns: DMart, Avenue, Supermarts, Kavita, Rao, Meteo, GitHub, Python, SQLite, PostgreSQL, or Markdown.
+
+The keyword exclusions include all words used in the intent rules, in singular and plural forms: metric, intent, unsupported-field, weather, date, and prohibited-action words; month names; weekday names; and words in recognised product names.
+
+The stop-word list is: `hello`, `thanks`, `thank`, `kindly`, `please`, `display`, `compare`, `which`, `what`, `whats`, `how`, `why`, `did`, `and`, `show`, `check`, `report`, `where`, `would`, `could`, `can`, `will`, `give`, `tell`, and `list`.
+
+The following fuzzy matches must work with the stated confidence scores:
+
+- `Bengalore` → Bengaluru, `0.78`
+- `Bangalor` → Bengaluru, `0.71`
+- `Punee` → Pune, `0.89`
+- `Hydrabad's` → Hyderabad, `0.94`
+- `Mumbay` → Mumbai, `0.83`
+
+`Banglore` has confidence `0.59` and must not resolve. A lowercase misspelling without a possessive `'s` must not be fuzzy-matched. The lowercase words `pure`, `ahead`, `plunge`, `pane`, and `ahmed` must never resolve as stores.
+
+A candidate whose best score is below `0.7` is an unresolved named store in these cases:
+
+1. **Regardless of whether another store resolved:** if the candidate carries `'s` or directly follows `and`, `or`, `vs`, `versus`, `than`, or `for`. This prevents a second unresolved store from being silently discarded. Examples:
+   - `Compare Mumbai and Kolkata revenue on 2026-05-15`
+   - `What was Mumbai's revenue versus Kolkata's on 2026-05-15?`
+   - `What was Punee's revenue for Kolkata on 2026-05-15?`
+
+2. **Only when no store resolved anywhere in the question:** if the candidate directly follows `about`, `in`, or `at`, or the question also contains a metric, weather word, or date. Thus, `What is the capital of India?` remains `out_of_scope`, and `Pune revenue on 2026-05-15 in total` must not treat `total` as an unresolved store.
+
+Any other capitalised word of at least five letters that is not a keyword or recognised store but carries `'s` or directly follows `for`, `and`, `or`, `vs`, `versus`, or `than` is treated as a named store. For example, `What was Pune's revenue for Diwali on 2026-05-15?` requires clarification. The three-letter phrase `for Eid` is not a candidate and is ignored.
+
+The brief's proper nouns require special handling: a proper noun from the list above that carries `'s` or directly follows `for`, `about`, `in`, or `at` is an unresolved named store when no store has resolved anywhere in the question. For example, `What was DMart's revenue on 2026-05-16?` must ask which store, even after a Pune lookup in the same session. However, `What was DMart's revenue in Pune on 2026-05-15?` and `Kavita's question: what was Pune's revenue on 2026-05-15?` must be answered for Pune.
+
+An unresolved named store has confidence `0.4`, produces `Clarification Needed` for every intent except `unsupported_metric`, `out_of_scope`, and `diagnostic`, and must never be replaced with a store from session context. Examples include `What was Kolkata's revenue on 2026-05-15?` after a Pune lookup and `How about Kolkata?` in the same session.
 
 ### 5.2 Product names
 
@@ -158,6 +187,31 @@ Additional rules:
 
 An unresolved named date has confidence `0.4`. For date-using intents, it produces `Clarification Needed` and is never replaced by a date from session context.
 
+### Additional date-phrase rules
+
+Month names count as date phrases wherever they appear, in any case. For example, `in june`, `for June`, `until june`, and `throughout may` are unresolved named dates unless they form part of a supported date format.
+
+The two month names that can also be verbs require special handling:
+
+- Lowercase `may` or `march` counts as a date phrase only when it directly follows one of these words: `in`, `on`, `of`, `during`, `since`, `for`, `from`, `until`, `till`, `by`, `to`, `through`, `throughout`, `before`, `after`, `within`, or `over`.
+- Capitalised `May` immediately before `I`, `we`, `you`, or `be` is treated as a verb, not a date.
+
+Therefore, `Which store may have the highest revenue on 2026-05-15?` and `May I know Pune's revenue on 2026-05-15?` are valid questions, while `Pune's revenue in may` requires date clarification.
+
+The supported `D Month YYYY` form is case-insensitive: `15 june 2026` is equivalent to `15 June 2026`.
+
+Weekday handling:
+
+- A weekday word anywhere in the question is ignored if it matches the weekday of the single valid date. For example, `On Sunday, what was Pune's revenue on 2026-05-17?`, `Sunday 2026-05-17`, `2026-05-17, a Sunday`, and `17 May 2026 (Sunday)` all refer to 17 May 2026.
+- A weekday that conflicts with the valid date, or a weekday without a valid date, is an unresolved named date. For example, `Monday 2026-05-17` and `on 2026-05-16 and Sunday` require clarification.
+- A plural weekday word such as `Sundays` or `weekdays` alongside a valid `between` range is ignored; the full range governs, without weekday filtering. Without a valid range, a plural weekday word is an unresolved named date.
+
+Only a date phrase that is present but outside the supported grammar is unresolved. If no date phrase is present at all, use the date from the same session's context when the intent requires a date. The supported word `yesterday` resolves through `AS_OF_DATE = 2026-06-30` to 2026-06-29.
+
+Date phrases in `inventory` and `feedback` questions are dropped before date validation. They do not lower confidence, trigger out-of-range failure, or update date context. For example, `What do customers say about Pune last week?` is a feedback question answered using all of Pune's feedback rows.
+
+Do not take the first date found when multiple dates appear. Any unsupported date phrase, extra date outside a valid `between` range, reversed range, or range supplied to a single-date intent must remain unresolved and must not be replaced with a date from session context.
+
 ### 5.5 Confidence score and ambiguity
 
 The confidence score is between `0` and `1`.
@@ -175,21 +229,33 @@ If an intent uses two different stores or two different metrics, set confidence 
 
 ### 5.6 Intent precedence
 
-Classify the intent using the following ordered rules. The first matching rule decides the intent.
+### 5.6 Intent precedence
 
-1. **Prohibited action or rule override → `out_of_scope`.** This includes `ignore`, `disregard`, `override`, `bypass`, `forget`, `send`, `email`, `whatsapp`, `purchase`, `buy`, `restock`, `place an order`, and imperative uses of `order` or `reorder`. The words `threshold`, `level`, or `point` immediately after `order`/`reorder` indicate an inventory noun phrase rather than an imperative.
-2. **Unsupported field → `unsupported_metric`.** Check this before applying synonyms. Include unsupported terms such as profit, margin, marketing, cost, expense, shortfall, efficiency, weekend, per footfall, and per visitor.
-3. **Why, trend, or reason question → `diagnostic`.**
-4. **Product name or inventory/reorder wording → `inventory`.**
-5. **Feedback, reviews, ratings, or customers saying/say/says → `feedback`.**
-6. **Target-check language → `target_vs_actual`.** This includes `target` with hit, met, meet, miss, missed, beat, exceed, exceeded, achieve, achieved, reach, reached, below, above, against, versus, or `fall short`; it also includes `achievement` or `performance band`.
-7. **Which/highest/lowest/best/worst comparison without a named store → `comparison`.**
-8. **Recognised metric, with or without store/date → `lookup`.**
-9. **Weather wording without a metric → `weather`.**
-10. **A question naming a store and/or date but no metric or weather word → `lookup`.** If the last stored question in the same session was `target_vs_actual`, a bare follow-up naming only a store or only a date remains a target check.
-11. **Nothing recognisable → `out_of_scope`.**
+Classify the intent using the first applicable rule in the following order. The keyword lists are closed vocabularies; they may be extended only if the required acceptance-case outcomes remain unchanged.
 
-These rules are closed vocabularies and may be widened only if doing so does not change any required acceptance-case outcome.
+1. **Prohibited action or rule override → `out_of_scope`.** This includes requests to ignore, disregard, override, or bypass the assistant's rules, and requests to send a message, email, WhatsApp message, purchase or buy something, restock, place an order, or reorder stock. Imperative uses of `order` and `reorder` are prohibited actions. The words `threshold`, `level`, or `point` immediately after `order` or `reorder` indicate an inventory noun phrase rather than an imperative. For example, `Reorder 200 units of Amul Milk for Pune` is `out_of_scope`, while `Reorder threshold for Amul Milk?` is `inventory`. A prohibited-action or rule-override request is always `Escalated`, even if it also names a recognised metric or store. Never execute the requested action.
+
+2. **Unsupported field → `unsupported_metric`.** Check for an unsupported field before applying metric synonyms. The closed unsupported vocabulary includes `profit`, `margin`, `marketing`, `cost`, `expense`, `shortfall`, `efficiency`, `weekend`, `per footfall`, and `per visitor`, including consistent singular/plural forms. Underscores are treated as spaces when identifying field names. Thus, `profit margin` and `performance_band` must not be mistaken for approved synonyms. `unsupported_metric` produces `Safe Failure`.
+
+3. **Diagnostic question → `diagnostic`.** A question asking why, asking for a cause, or asking for a trend or explanation beyond the supported descriptive analysis is diagnostic. For example, `Why is Pune's revenue so low?` is `diagnostic`. Do not infer a cause from correlation. `diagnostic` produces `Escalated`.
+
+4. **Product or inventory/reorder wording → `inventory`.** For example, `Which stores are below the reorder threshold for Amul Milk?` is `inventory`. A prohibited imperative caught by rule 1 must not reach this rule.
+
+5. **Feedback wording → `feedback`.** Feedback, reviews, ratings, or customers saying/say/says indicate this intent. For example, `What do customers say about Pune?` is `feedback`.
+
+6. **Target-check wording → `target_vs_actual`.** The word `target` together with any of `hit`, `met`, `meet`, `miss`, `missed`, `beat`, `exceed`, `exceeded`, `achieve`, `achieved`, `reach`, `reached`, `below`, `above`, `against`, `versus`, or the phrase `fall short` indicates this intent. The word `achievement` or phrase `performance band` also indicates `target_vs_actual`. `achievement_pct` and `performance_band` are approved fields but are reported only through this intent.
+
+7. **Comparison → `comparison`.** A question using `which`, `highest`, `lowest`, `best`, or `worst` that names no store is a comparison. If the question names two different stores or metrics, clarification is required rather than first-match-wins.
+
+8. **Recognised metric → `lookup`.** A recognised metric, with or without a store and date, indicates a lookup. Apply the approved synonym list only after rule 2 has ruled out an unsupported field.
+
+9. **Weather → `weather`.** A weather word with no metric indicates the `weather` intent. Weather words include `weather`, `rain`, `temperature`, `humidity`, `hot`, and `cold`. If a weather word appears with a metric, the weather tool is added only where allowed by the routing rules in this document.
+
+10. **Named store or date without a metric → `lookup`.** A question that names a store and/or date, whether resolved or unresolved, but contains no metric or weather word is `lookup`, not `out_of_scope`. Examples include `Pune on 2026-05-15?`, `How did Pune do on 2026-05-15?`, `How about Kolkata?`, and `How about 15 Jun 2026?`. If the last stored question in the same session was `target_vs_actual`, a bare follow-up naming only a store or only a date remains `target_vs_actual`; for example, `And Mumbai?` continues the target check using the stored date.
+
+11. **Nothing recognisable → `out_of_scope`.** If none of the preceding rules applies, classify the question as `out_of_scope`. For example, `What is the capital of India?` is `out_of_scope`.
+
+Intent precedence determines the intent first. Apply the confidence, required-entity, date-range, query-result, retry, and alert status precedence in Section 7 only after intent classification.
 
 ### 5.7 Required entities by intent
 
