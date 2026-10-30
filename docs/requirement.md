@@ -75,7 +75,7 @@ No other field may be returned or treated as a reportable metric.
 
 ### Fields permitted only as keys
 
-The following fields may be used to identify, filter, join, label, or group records, where applicable:
+The following fields may be used only as filters or grouping keys:
 
 - `store`
 - `store_id`
@@ -106,7 +106,7 @@ The assistant should answer questions that can be resolved using approved metric
 | Inventory threshold | “Which stores are below the reorder threshold for Amul Milk?” | Compare `stock_units` with `reorder_threshold` and list records strictly below the threshold. |
 | Customer feedback | “What are customers saying about Hyderabad?” | Summarize available feedback themes and report ratings only when supported by the data. |
 | Date-range analysis | “What was Mumbai’s average daily revenue in May 2026?” | Calculate the average from eligible records in the requested period. |
-| Weather | “What is the weather in Pune today?” | Use the designated weather tool; do not invent weather information from the DMart datasets. |
+| Weather | “What was the weather in Pune on 2026-05-15?” | Use the designated weather tool; do not invent weather information from the DMart datasets. |
 
 For every data-backed response, the assistant must use retrieved or calculated values from approved sources. It must clearly identify the relevant store, product, date, or period when needed to interpret the answer.
 
