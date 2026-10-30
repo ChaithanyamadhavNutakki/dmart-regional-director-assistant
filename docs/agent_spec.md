@@ -30,7 +30,7 @@ The only approved reportable metric fields are:
 | `inventory` | `stock_units`, `reorder_threshold` |
 | `feedback` | `rating`, `theme` |
 
-The following columns may be used only as filters, grouping keys, or row labels: `store`, `store_id`, `date`, `product`, and `product_id`. They are not reportable metrics and are not part of the 11 approved fields.
+The following columns may be used only as filters or grouping keys: `store`, `store_id`, `date`, `product`, and `product_id`. They are not reportable metrics and are not part of the 11 approved fields.
 
 `marketing_spend_inr` is deliberately not approved. Other unapproved fields include derived fields such as `revenue_per_footfall`, `marketing_efficiency`, `shortfall_inr`, and `weekend_flag`.
 
@@ -51,12 +51,12 @@ The pipeline contains eight steps. **Validation is performed before the data que
 
 | Step | What it does | Type | Technique |
 |---|---|---|---|
-| Interpret | Identify the intent, store, metric, date or range, product, weather request, confidence, and missing required entities. | Generative-style interface, implemented deterministically | Rule-based interpreter using closed vocabularies, date grammar, exact matches, aliases, and controlled fuzzy matching. No language model in the default mode. |
+| Interpret | Identify the intent, store, metric, date or range, product, weather request, confidence, and missing required entities. | Generative (default implementation is deterministic) | Rule-based interpreter using closed vocabularies, date grammar, exact matches, aliases, and controlled fuzzy matching. No language model in the default mode. |
 | Route | Select the appropriate Python function, SQL query, weather tool, combined Python-plus-weather route, or no route. | Deterministic | Fixed intent-to-route mapping. |
 | Validate | Check the intent, table, and requested measured fields against the approved list before executing any query. Reject unsupported fields and prohibited requests. | Deterministic | Allowlist and rule checks. |
 | Query | Fetch the requested records or aggregates from the cleaned data, local SQLite, or weather tool. | Deterministic | Python lookup functions, parameterised SQLite queries, or the weather tool. |
 | Calculate | Calculate target achievement, averages, rankings, counts, and other permitted derived results. | Deterministic | Python arithmetic, SQL aggregation where appropriate, and explicit rounding rules. |
-| Synthesize | Turn the validated results into a concise answer and assign the applicable completion status. | Generative-style interface, implemented deterministically | Fixed answer templates and status rules. No language model in the default mode. |
+| Synthesize | Turn the validated results into a concise answer and assign the applicable completion status. | Generative (default implementation is deterministic) | Fixed answer templates and status rules. No language model in the default mode. |
 | Ground | Attach source evidence and numeric grounding values; calculate the ungrounded-number count. | Deterministic | Structured evidence records, fetched-value tracking, and numeric checks. |
 | Record | Append the result and audit metadata as one JSON line. | Deterministic | JSON Lines logging, a monotonic timer, and token estimation by whitespace-separated words. |
 
@@ -229,12 +229,10 @@ If an intent uses two different stores or two different metrics, set confidence 
 
 ### 5.6 Intent precedence
 
-### 5.6 Intent precedence
-
 Classify the intent using the first applicable rule in the following order. The keyword lists are closed vocabularies; they may be extended only if the required acceptance-case outcomes remain unchanged.
 
-1. **Prohibited action or rule override → `out_of_scope`.** This includes requests to ignore, disregard, override, or bypass the assistant's rules, and requests to send a message, email, WhatsApp message, purchase or buy something, restock, place an order, or reorder stock. Imperative uses of `order` and `reorder` are prohibited actions. The words `threshold`, `level`, or `point` immediately after `order` or `reorder` indicate an inventory noun phrase rather than an imperative. For example, `Reorder 200 units of Amul Milk for Pune` is `out_of_scope`, while `Reorder threshold for Amul Milk?` is `inventory`. A prohibited-action or rule-override request is always `Escalated`, even if it also names a recognised metric or store. Never execute the requested action.
-
+1. **Prohibited action or rule override → `out_of_scope`.** This includes `ignore`, `disregard`, `override`, `bypass`, `forget`, `send`, `email`, `whatsapp`, `purchase`, `buy`, `restock`, and the phrase `place an order`. The words `order` and `reorder` are also prohibited when used imperatively: at the beginning of the question; directly after `please`, `kindly`, `can you`, `could you`, `will you`, `would you`, or `go ahead and`; or after a comma-address such as `Pune, reorder Amul Milk`. The exception is when the very next word is `threshold`, `level`, or `point`, including plural forms, which indicates an inventory noun phrase. Thus, `Reorder 200 units of Amul Milk for Pune` and `Pune, reorder Amul Milk` are `out_of_scope`, while `Reorder threshold for Amul Milk?` and `below the reorder threshold` are not. A prohibited-action or rule-override request is always `Escalated`, even if it also names a recognised metric, store, or date. Never execute the requested action.
+      
 2. **Unsupported field → `unsupported_metric`.** Check for an unsupported field before applying metric synonyms. The closed unsupported vocabulary includes `profit`, `margin`, `marketing`, `cost`, `expense`, `shortfall`, `efficiency`, `weekend`, `per footfall`, and `per visitor`, including consistent singular/plural forms. Underscores are treated as spaces when identifying field names. Thus, `profit margin` and `performance_band` must not be mistaken for approved synonyms. `unsupported_metric` produces `Safe Failure`.
 
 3. **Diagnostic question → `diagnostic`.** A question asking why, asking for a cause, or asking for a trend or explanation beyond the supported descriptive analysis is diagnostic. For example, `Why is Pune's revenue so low?` is `diagnostic`. Do not infer a cause from correlation. `diagnostic` produces `Escalated`.
