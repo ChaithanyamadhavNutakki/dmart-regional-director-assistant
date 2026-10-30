@@ -30,7 +30,7 @@ The only approved reportable metric fields are:
 | `inventory` | `stock_units`, `reorder_threshold` |
 | `feedback` | `rating`, `theme` |
 
-The following columns may be used only as filters or grouping keys: `store`, `store_id`, `date`, `product`, and `product_id`. They are not reportable metrics and are not part of the 11 approved fields.
+The following columns may be used as filters, grouping keys, and row labels or identifiers when needed to present results: `store`, `store_id`, `date`, `product`, and `product_id`. They are not reportable metrics and are not part of the 11 approved fields. A key column may appear in a result as a label or identifier, but must never be treated as a measured value or reportable metric.
 
 `marketing_spend_inr` is deliberately not approved. Other unapproved fields include derived fields such as `revenue_per_footfall`, `marketing_efficiency`, `shortfall_inr`, and `weekend_flag`.
 
@@ -43,7 +43,7 @@ For SQL:
 - Never concatenate user text into a SQL value or filter.
 - A dynamic column name may enter SQL only after it has passed the approved-field check.
 - Sort direction must be selected from the fixed whitelist `ASC` or `DESC`.
-- Never use a key column as the measured value.
+- Never use a key column as a measured value. Key columns may appear in `SELECT` results as row labels or identifiers when needed, and may be used in `WHERE` or `GROUP BY` clauses.
 
 ## 3. Processing pipeline
 
@@ -96,7 +96,7 @@ A weather request combined with a one-store, one-date lookup or target check use
 
 ### 5.1 Store names and aliases
 
-The five recognised stores are Mumbai, Pune, Hyderabad, Bengaluru, and Ahmedabad.
+The five recognised stores are Mumbai, Pune, Hyderabad, Bengaluru, and Ahmedabad. Match exact store names case-insensitively wherever they appear in the question. Treat `Bangalore` as an explicit, case-insensitive alias for `Bengaluru`, with confidence `1.0`. Resolve exact store names and this explicit alias before attempting fuzzy matching. Fuzzy matching rules and confidence scores apply only when neither an exact store name nor the explicit alias resolves the store.
 
 ### Fuzzy matching and unresolved stores
 
@@ -243,7 +243,7 @@ Classify the intent using the first applicable rule in the following order. The 
 
 6. **Target-check wording → `target_vs_actual`.** The word `target` together with any of `hit`, `met`, `meet`, `miss`, `missed`, `beat`, `exceed`, `exceeded`, `achieve`, `achieved`, `reach`, `reached`, `below`, `above`, `against`, `versus`, or the phrase `fall short` indicates this intent. The word `achievement` or phrase `performance band` also indicates `target_vs_actual`. `achievement_pct` and `performance_band` are approved fields but are reported only through this intent.
 
-7. **Comparison → `comparison`.** A question using `which`, `highest`, `lowest`, `best`, or `worst` that names no store is a comparison. If the question names two different stores or metrics, clarification is required rather than first-match-wins.
+7. **Comparison → `comparison`.** A question that explicitly asks to `compare` or requests a `comparison` across stores must be classified as `comparison`, even when no individual store is named. Questions using `which`, `highest`, `lowest`, `best`, or `worst` that ask for a cross-store ranking are also `comparison`. A comparison requires a metric and a date or date range; it never requires or inherits a store. If the question names two different stores or two different metrics, clarification is required rather than first-match-wins. For example, `Compare average revenue across the five stores` is `comparison`; `Which store had the highest revenue between 2026-05-01 and 2026-05-31?` is also `comparison`.
 
 8. **Recognised metric → `lookup`.** A recognised metric, with or without a store and date, indicates a lookup. Apply the approved synonym list only after rule 2 has ruled out an unsupported field.
 
