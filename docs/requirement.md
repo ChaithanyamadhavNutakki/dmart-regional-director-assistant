@@ -75,7 +75,7 @@ No other field may be returned or treated as a reportable metric.
 
 ### Fields permitted only as keys
 
-The following fields may be used only as filters or grouping keys:
+The following fields may be used only as filters, grouping keys, and row labels or identifiers when needed to present results:
 
 - `store`
 - `store_id`
@@ -83,7 +83,7 @@ The following fields may be used only as filters or grouping keys:
 - `product`
 - `product_id`
 
-These fields may be used only as keys for filtering or grouping records. They are not reportable metrics and must never be returned or counted among the 11 approved metrics.
+They must never be treated as measured values or reportable metrics. Only the 11 approved metric fields listed above may be reported as metrics. marketing_spend_inr is not an approved metric.
 
 ### Explicitly unapproved fields
 
