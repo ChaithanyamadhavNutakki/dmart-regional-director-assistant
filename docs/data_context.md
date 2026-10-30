@@ -173,7 +173,7 @@ The project generator deliberately leaves **12 of the 200 feedback ratings unrat
 
 When calculating an average rating, only records with an actual rating are included in the average. The response should distinguish the number of rated records from the total number of feedback records.
 
-The feedback dates are generated within the project's 90-day period, 2026-04-01 to 2026-06-29. This is the generation period; the actual minimum and maximum dates present in the CSV should be confirmed from the file if an exact observed date range is required.
+The observed feedback dates range from 2026-04-01 to 2026-06-29, verified against the committed data/feedback.csv file. The dataset therefore covers the full project date range.
 
 ### Questions supported
 
@@ -206,7 +206,7 @@ The datasets serve different purposes:
 - `inventory.csv` contains current store-product stock and threshold records.
 - `feedback.csv` contains dated customer feedback entries.
 
-The common store identifier allows the assistant to associate inventory and feedback with the relevant store and compare them with daily performance when the question requires it. Inventory has no date, so it must not be joined to daily data in a way that implies historical inventory values.
+The shared store names allow the assistant to filter or group each dataset for the relevant store. Query the appropriate dataset independently and do not join datasets for an answer. Inventory has no date, so it must not be represented as historical inventory.
 
 The assistant should filter records to the requested store or stores and use the appropriate dataset for each intent. Joins must preserve the grain of each dataset: daily records, store-product records, and feedback records must not be multiplied inadvertently in a join.
 
