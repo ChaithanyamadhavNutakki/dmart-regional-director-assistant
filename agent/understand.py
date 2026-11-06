@@ -339,13 +339,22 @@ def find_date(question):
 
     # 1. Detect unsupported date expressions.
     unsupported_date_patterns = [
-          r"\btomorrow\b",
-          r"\btoday\b",
-          r"\blast\s+week\b",
-          r"\bnext\s+week\b",
-          r"\blast\s+month\b",
-          r"\bnext\s+month\b",
-          r"\bfrom\s+.+?\s+to\s+.+",
+        r"\btomorrow\b",
+        r"\btoday\b",
+        r"\blast\s+week\b",
+        r"\bnext\s+week\b",
+        r"\blast\s+month\b",
+        r"\bnext\s+month\b",
+        r"\bfrom\s+.+?\s+to\s+.+",
+
+        # Abbreviated month names
+        r"\b\d{1,2}\s+(?:Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+\d{4}\b",
+
+        # Date without year
+        r"\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\b(?!\s+\d{4})",
+
+        # Compact numeric dates
+        r"\b\d{8}\b",
       ]
 
     for pattern in unsupported_date_patterns:
