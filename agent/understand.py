@@ -69,6 +69,7 @@ UNSUPPORTED_METRICS = [
 
 
 # 5. INTERPRETER CONFIGURATION
+from datetime import datetime, timedelta
 AS_OF_DATE = "2026-06-30"
 
 MIN_FUZZY_MATCH_SCORE = 0.70
@@ -333,3 +334,148 @@ def find_metric(question):
         "status": "none"
     }
 
+def find_date(question):
+    """Identifies a supported date or date range."""
+
+    # 1. Detect unsupported date expressions.
+    unsupported_date_patterns = [
+          r"\btomorrow\b",
+          r"\btoday\b",
+          r"\blast\s+week\b",
+          r"\bnext\s+week\b",
+          r"\blast\s+month\b",
+          r"\bnext\s+month\b",
+          r"\bfrom\s+.+?\s+to\s+.+",
+      ]
+
+    for pattern in unsupported_date_patterns:
+      if re.search(pattern, question, re.IGNORECASE):
+        return {
+          "date": None,
+          "start_date": None,
+          "end_date": None,
+          "confidence": 0.4,
+          "status": "unresolved"
+        }
+
+    # 2. Date range: between DATE and DATE
+    range_match = re.search(
+        r"\bbetween\s+(\d{4}-\d{2}-\d{2})\s+and\s+(\d{4}-\d{2}-\d{2})\b",
+        question,
+        re.IGNORECASE
+    )
+
+    if range_match:
+        start_text, end_text = range_match.groups()
+
+        try:
+            start_date = datetime.strptime(
+                start_text, "%Y-%m-%d"
+            ).date()
+
+            end_date = datetime.strptime(
+                end_text, "%Y-%m-%d"
+            ).date()
+
+            if start_date > end_date:
+                raise ValueError("Reversed date range")
+
+            return {
+                "date": None,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+                "confidence": 1.0,
+                "status": "range"
+            }
+
+        except ValueError:
+            return {
+                "date": None,
+                "start_date": None,
+                "end_date": None,
+                "confidence": 0.4,
+                "status": "unresolved"
+            }
+
+    # 3. Yesterday
+    if re.search(r"\byesterday\b", question, re.IGNORECASE):
+        reference_date = datetime.strptime(
+            AS_OF_DATE, "%Y-%m-%d"
+        ).date()
+
+        yesterday = reference_date - timedelta(days=1)
+
+        return {
+            "date": yesterday.isoformat(),
+            "start_date": None,
+            "end_date": None,
+            "confidence": 1.0,
+            "status": "exact"
+        }
+
+    # 4. ISO date
+    iso_dates = re.findall(
+        r"\b\d{4}-\d{2}-\d{2}\b",
+        question
+    )
+
+    for date_text in iso_dates:
+        try:
+            parsed_date = datetime.strptime(
+                date_text, "%Y-%m-%d"
+            ).date()
+
+            return {
+                "date": parsed_date.isoformat(),
+                "start_date": None,
+                "end_date": None,
+                "confidence": 1.0,
+                "status": "exact"
+            }
+
+        except ValueError:
+            return {
+                "date": None,
+                "start_date": None,
+                "end_date": None,
+                "confidence": 0.4,
+                "status": "unresolved"
+            }
+
+    # 5. Written date
+    written_dates = re.findall(
+        r"\b\d{1,2}\s+[A-Za-z]+\s+\d{4}\b",
+        question
+    )
+
+    for date_text in written_dates:
+        try:
+            parsed_date = datetime.strptime(
+                date_text, "%d %B %Y"
+            ).date()
+
+            return {
+                "date": parsed_date.isoformat(),
+                "start_date": None,
+                "end_date": None,
+                "confidence": 1.0,
+                "status": "exact"
+            }
+
+        except ValueError:
+            return {
+                "date": None,
+                "start_date": None,
+                "end_date": None,
+                "confidence": 0.4,
+                "status": "unresolved"
+            }
+
+    return {
+        "date": None,
+        "start_date": None,
+        "end_date": None,
+        "confidence": 1.0,
+        "status": "none"
+    }
+    
