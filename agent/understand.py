@@ -334,6 +334,37 @@ def find_metric(question):
         "status": "none"
     }
 
+def find_weekday(question):
+    """Identifies weekday names in a question."""
+
+    weekdays = [
+        "monday", "tuesday", "wednesday",
+        "thursday", "friday", "saturday", "sunday"
+    ]
+
+    found_weekdays = []
+
+    for weekday in weekdays:
+        if re.search(
+            r"\b" + weekday + r"s?\b",
+            question,
+            re.IGNORECASE
+        ):
+            found_weekdays.append(weekday)
+
+    return found_weekdays
+
+def validate_weekday(weekday, date_text):
+    """Checks whether a weekday matches a calendar date."""
+
+    parsed_date = datetime.strptime(
+        date_text, "%Y-%m-%d"
+    ).date()
+
+    actual_weekday = parsed_date.strftime("%A").lower()
+
+    return weekday.lower() == actual_weekday
+
 def find_date(question):
     """Identifies a supported date or date range."""
 
