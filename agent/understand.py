@@ -283,3 +283,53 @@ def find_product(question):
         "confidence": 1.0,
         "status": "none"
     }
+
+
+
+def find_metric(question):
+    """Identifies an approved or unsupported metric in a question."""
+
+    question_lower = question.lower().replace("_", " ")
+
+    # 1. Check unsupported metrics first.
+    for unsupported in UNSUPPORTED_METRICS:
+
+        if unsupported == "expense":
+            pattern = r"\bexpenses?\b"
+
+        elif unsupported == "per visitor":
+            pattern = r"\bper\s+visitors?\b"
+
+        else:
+            pattern = (
+                r"\b"
+                + re.escape(unsupported).replace(r"\ ", r"\s+")
+                + r"\b"
+            )
+
+        if re.search(pattern, question_lower):
+            return {
+                "metric": None,
+                "confidence": 1.0,
+                "status": "unsupported"
+            }
+
+    # 2. Check approved metric synonyms.
+    for synonym, standard_metric in METRIC_SYNONYMS.items():
+
+        pattern = r"\b" + re.escape(synonym) + r"\b"
+
+        if re.search(pattern, question_lower):
+            return {
+                "metric": standard_metric,
+                "confidence": 1.0,
+                "status": "exact"
+            }
+
+    # 3. No metric identified.
+    return {
+        "metric": None,
+        "confidence": 1.0,
+        "status": "none"
+    }
+
