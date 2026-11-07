@@ -354,6 +354,8 @@ def find_weekday(question):
 
     return found_weekdays
 
+
+
 def validate_weekday(weekday, date_text):
     """Checks whether a weekday matches a calendar date."""
 
@@ -365,7 +367,7 @@ def validate_weekday(weekday, date_text):
 
     return weekday.lower() == actual_weekday
 
-def find_date(question):
+def _find_date_without_weekday(question):
     """Identifies a supported date or date range."""
 
     # 1. Detect unsupported date expressions.
@@ -518,4 +520,47 @@ def find_date(question):
         "confidence": 1.0,
         "status": "none"
     }
-    
+
+def find_date(question):
+    """Identifies dates and validates weekday references."""
+
+    # First, run the existing date recognition logic.
+    result = _find_date_without_weekday(question)
+
+    # Identify weekday references.
+    weekdays = find_weekday(question)
+
+    # No weekday mentioned: retain the original result.
+    if not weekdays:
+        return result
+
+    # Check whether any weekday is plural (e.g. Mondays).
+    has_plural_weekday = any(
+        re.search(
+            r"\b" + weekday + r"s\b",
+            question,
+            re.IGNORECASE
+        )
+        for weekday in weekdays
+    )
+
+    # Plural weekdays are permitted with valid date ranges.
+    if result["status"] == "range" and has_plural_weekday:
+        return result
+
+    # For a single date, validate the weekday.
+    if result["status"] == "exact" and len(weekdays) == 1:
+
+        if not has_plural_weekday and validate_weekday(
+            weekdays[0], result["date"]
+        ):
+            return result
+
+    # All other weekday/date combinations are unresolved.
+    return {
+        "date": None,
+        "start_date": None,
+        "end_date": None,
+        "confidence": 0.4,
+        "status": "unresolved"
+    }
