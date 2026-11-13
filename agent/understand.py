@@ -761,7 +761,7 @@ def _clarification_for(missing, unresolved):
     elif "store" in missing:
         parts.append("a store")
 
-    if "metric" in missing:
+    if "metric" in missing or "metric" in unresolved:
         parts.append("the metric (for example, revenue or footfall)")
     if "date" in unresolved:
         parts.append("a supported date or date range")
