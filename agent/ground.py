@@ -113,17 +113,37 @@ def _source_evidence(query_result, interpretation, weather_result):
             dates = sorted({
                 row.get("date") for row in records if row.get("date")
             })
+
+            if (
+                query_result.get("query_type", "").startswith("store_comparison")
+                or (table == "inventory" and not entities.get("store"))
+            ):
+                evidence_store = "all"
+            elif len(stores) == 1:
+                evidence_store = stores[0]
+            else:
+                evidence_store = entities.get("store")
+
+            if entities.get("start_date") and entities.get("end_date"):
+                evidence_date = (
+                    f"{entities['start_date']} to {entities['end_date']}"
+                )
+            elif len(dates) == 1:
+                evidence_date = dates[0]
+            else:
+                evidence_date = entities.get("date")
+
             evidence.append({
                 "source": SOURCE_FILES[table],
                 "fields": fields,
-                "store": stores[0] if len(stores) == 1 else entities.get("store"),
-                "date": dates[0] if len(dates) == 1 else entities.get("date"),
+                "store": evidence_store,
+                "date": evidence_date,
             })
 
     if isinstance(weather_result, dict) and weather_result.get("success"):
         evidence.append({
             "source": SOURCE_FILES["weather"],
-            "fields": ["temperature_c", "humidity_pct", "wind_kmh", "rainfall_mm"],
+            "fields": ["temperature_c", "humidity_pct", "wind_kmh", "rain_mm"],
             "store": weather_result.get("store") or entities.get("store"),
             "date": weather_result.get("date") or entities.get("date"),
         })
