@@ -1,0 +1,16 @@
+# Python runtime files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local secrets and environment files
+.env
+.env.*
+
+# Notebook and operating-system metadata
+.ipynb_checkpoints/
+.DS_Store
+
+# Local virtual environments
+.venv/
+venv/
