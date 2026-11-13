@@ -36,3 +36,4 @@ C10,context_setup,s28,What was Pune's revenue on 2026-05-15?,0,Answered,lookup,I
 C11,unresolved_store,s28,What was Kolkata's revenue on 2026-05-16?,0,Clarification Needed,lookup,store name
 C12,context_setup,s30,What was Pune's revenue on 2026-05-15?,0,Answered,lookup,INR 623845.00
 C13,unresolved_date,s30,What was Pune's revenue last week?,0,Clarification Needed,lookup,date
+C14,ambiguity,s31,What was Pune's revenue and footfall on 2026-05-15?,0,Clarification Needed,lookup,metric
