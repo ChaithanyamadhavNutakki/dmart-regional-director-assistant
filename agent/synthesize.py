@@ -145,7 +145,7 @@ def _synthesize_target(result):
     if values.get("alert"):
         answer += (
             " This result is held as a draft for human approval because it is "
-            "in the Poor performance band and below 75% of target."
+            "in the Poor performance band and below 75.00% of target."
         )
         return _status_result("Drafted", answer, result)
 
