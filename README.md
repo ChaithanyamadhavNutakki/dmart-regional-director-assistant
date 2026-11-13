@@ -11,7 +11,7 @@ This repository contains one connected capstone project: a data-quality and oper
 - **Part A — Data foundation:** datasets, cleaning log, data-quality report, findings and executive summary are present.
 - **Part B — Specification:** requirement, data-context and agent-specification documents are present.
 - **Part C — Agent:** the prescribed entry-point modules, supporting implementation modules, weather stub, weather test report, acceptance transcript and audit log are present. The latest recorded integration run reported 20/20 acceptance cases, 6/6 weather checks and audit integrity PASS. Part C is closed unless a new integration defect is found.
-- **Part D — Evaluation and release decision:** the 37-case golden set, independent derivation notes and reproducible evaluation runner are committed. The evaluation still must be executed from the repository root; measured results, the four-metric summary and the release gate will be committed only after that run.
+- **Part D — Evaluation and release decision:** the 38-case golden set, independent derivation notes and reproducible evaluation runner are committed. The evaluation still must be executed from the repository root; measured results, the four-metric summary and the release gate will be committed only after that run.
 
 ## Free offline setup
 
