@@ -56,9 +56,9 @@ def _stub_weather(city, requested_date):
         "city": city,
         "date": requested_date.isoformat(),
         "mode": "stub",
-        "temperature_c": 20 + (name_length + day_of_year) % 15,
-        "humidity_pct": 40 + (3 * name_length + day_of_year) % 50,
-        "wind_kmh": 5 + day_of_year % 10,
+        "temperature_c": float(20 + (name_length + day_of_year) % 15),
+        "humidity_pct": float(40 + (3 * name_length + day_of_year) % 50),
+        "wind_kmh": float(5 + day_of_year % 10),
         "rain_mm": 6.5 if day_of_year % 4 == 0 else 0.0,
     }
 
