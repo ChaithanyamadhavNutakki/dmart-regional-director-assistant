@@ -73,7 +73,11 @@ def _collect_numeric_values(value, output, field_name=None):
         for key, item in value.items():
             # Dates and identifiers are not measured numeric evidence.
             if (
-                key in {"date", "start_date", "end_date", "store_id", "product_id"}
+                key in {
+                    "date", "start_date", "end_date", "store_id", "product_id",
+                    "source_row_count", "row_count", "shortage_count",
+                    "theme_frequency",
+                }
                 or str(key).startswith("_")
             ):
                 continue
