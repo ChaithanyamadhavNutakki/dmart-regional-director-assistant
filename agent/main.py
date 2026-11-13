@@ -70,8 +70,7 @@ def _run_weather(entities: dict[str, Any]) -> dict[str, Any]:
             "date": entities.get("date"),
         }
 
-    # The weather stub interface is kept deliberately small. A TypeError
-    # indicates an incompatible stub contract and is handled as a tool failure.
+    # The weather stub exposes the required get_weather(city, date) contract.
     result = weather_function(
         city=entities.get("store"),
         date=entities.get("date"),
