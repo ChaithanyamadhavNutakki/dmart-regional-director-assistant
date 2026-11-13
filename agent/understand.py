@@ -315,17 +315,27 @@ def find_metric(question):
                 "status": "unsupported"
             }
 
-    # 2. Check approved metric synonyms.
+    # 2. Collect distinct approved metrics. Different metrics in one
+    # question are ambiguous; do not silently select the first match.
+    matched_metrics = set()
     for synonym, standard_metric in METRIC_SYNONYMS.items():
-
         pattern = r"\b" + re.escape(synonym) + r"\b"
-
         if re.search(pattern, question_lower):
-            return {
-                "metric": standard_metric,
-                "confidence": 1.0,
-                "status": "exact"
-            }
+            matched_metrics.add(standard_metric)
+
+    if len(matched_metrics) > 1:
+        return {
+            "metric": None,
+            "confidence": 0.4,
+            "status": "ambiguous"
+        }
+
+    if len(matched_metrics) == 1:
+        return {
+            "metric": next(iter(matched_metrics)),
+            "confidence": 1.0,
+            "status": "exact"
+        }
 
     # 3. No metric identified.
     return {
@@ -826,6 +836,16 @@ def understand(question, context=None):
         if name in relevant_entities and _entity_is_unresolved(result):
             unresolved.append(name)
 
+    # Store names are not a comparison filter (comparisons always rank all
+    # stores), but explicitly naming two conflicting stores is still
+    # ambiguous and must not be silently ignored.
+    if (
+        intent == "comparison"
+        and store_result["status"] in {"unresolved", "ambiguous"}
+        and "store" not in unresolved
+    ):
+        unresolved.append("store")
+
     # A date range is represented by start_date/end_date, not date.
     date_present = date_result["status"] in {"exact", "range"}
     date_explicitly_unresolved = date_result["status"] == "unresolved"
@@ -913,6 +933,11 @@ def understand(question, context=None):
         intent == "inventory"
         and store_result["status"] not in {"none"}
     ):
+        confidence_values.append(store_result["confidence"])
+
+    # Comparison ranks all stores and never inherits one from context, but a
+    # store explicitly named in the question still contributes to confidence.
+    if intent == "comparison" and store_result["status"] != "none":
         confidence_values.append(store_result["confidence"])
 
     confidence = min(confidence_values) if confidence_values else 1.0
