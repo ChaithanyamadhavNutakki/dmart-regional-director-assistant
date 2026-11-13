@@ -94,9 +94,9 @@ def main():
                 "",
                 "Observed output:",
                 "",
-                "\`\`\`python",
+                chr(96) * 3 + "python",
                 pprint.pformat(actual, sort_dicts=False),
-                "\`\`\`",
+                chr(96) * 3,
                 "",
             ]
         )
