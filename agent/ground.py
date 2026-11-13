@@ -123,7 +123,7 @@ def _source_evidence(query_result, interpretation, weather_result):
     if isinstance(weather_result, dict) and weather_result.get("success"):
         evidence.append({
             "source": SOURCE_FILES["weather"],
-            "fields": ["temperature_c", "humidity_pct", "rainfall_mm"],
+            "fields": ["temperature_c", "humidity_pct", "wind_kmh", "rainfall_mm"],
             "store": weather_result.get("store") or entities.get("store"),
             "date": weather_result.get("date") or entities.get("date"),
         })
