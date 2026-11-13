@@ -4,15 +4,13 @@
 
 The fixed cases A01–A20, W01–W03 and R01 reproduce the exact questions, sessions, status, intent and required answer content in the Part D brief. Their expected answers are the fixed acceptance values stated in the brief; they are not inferred from the agent's output.
 
-The additional cases C01–C13 were chosen to exercise the nine mandatory categories plus normal lookups and a date-range lookup. The independent numeric expectations below were derived directly from the committed source CSV files, not by calling the conversational agent.
+The additional cases C01–C14 were chosen to exercise the nine mandatory categories plus normal lookups and a date-range lookup. The independent numeric expectations below were derived directly from the committed source CSV files, not by calling the conversational agent.
 
 ## Independent calculations for original cases
 
 ### C01 — fuzzy store-name resolution
 
 Source: `data/store_daily_clean.csv`.
-
-Filter expression equivalent to pandas:
 
 ```python
 df.loc[(df["store"] == "Bengaluru") &
