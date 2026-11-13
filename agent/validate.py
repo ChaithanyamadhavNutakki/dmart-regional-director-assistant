@@ -321,8 +321,8 @@ def validate(interpretation, selected_route=None):
 
     # Ensure the route is consistent with the fixed intent-to-route contract.
     expected_routes = {
-        "lookup": {"python", "sql"},
-        "target_vs_actual": {"python"},
+        "lookup": {"python", "sql", "python+weather"},
+        "target_vs_actual": {"python", "python+weather"},
         "comparison": {"sql"},
         "inventory": {"sql"},
         "feedback": {"sql"},
