@@ -801,9 +801,13 @@ def understand(question, context=None):
     # Only entities used by this intent can block execution. An irrelevant
     # unresolved entity must not trigger clarification or affect confidence.
     required = REQUIRED_ENTITIES[intent]
+    relevant_entities = set(required)
+    if intent == "inventory":
+        relevant_entities.add("store")  # Optional store filter when explicitly supplied.
+
     unresolved = []
     for name, result in results.items():
-        if name in required and _entity_is_unresolved(result):
+        if name in relevant_entities and _entity_is_unresolved(result):
             unresolved.append(name)
 
     # A date range is represented by start_date/end_date, not date.
@@ -887,6 +891,13 @@ def understand(question, context=None):
             confidence_values.append(0.4 if name in missing else 1.0)
         else:
             confidence_values.append(result["confidence"])
+
+    # Inventory's optional store filter is relevant only when explicitly named.
+    if (
+        intent == "inventory"
+        and store_result["status"] not in {"none"}
+    ):
+        confidence_values.append(store_result["confidence"])
 
     confidence = min(confidence_values) if confidence_values else 1.0
     needs_clarification = bool(missing or unresolved or confidence < 0.7)
