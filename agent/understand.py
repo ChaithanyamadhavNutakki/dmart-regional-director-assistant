@@ -697,8 +697,12 @@ def find_intent(question, context=None):
         if any(re.search(p, text) for p in INTENT_PATTERNS[intent]):
             return intent
 
-    # 8. A recognised metric indicates a lookup.
-    if metric_result["metric"] is not None:
+    # 8. A recognised metric (or an ambiguous pair of metrics) indicates
+    # a lookup; ambiguity is resolved by clarification in understand().
+    if (
+        metric_result["metric"] is not None
+        or metric_result["status"] == "ambiguous"
+    ):
         return "lookup"
 
     # 9. Weather.
