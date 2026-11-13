@@ -810,8 +810,11 @@ def understand(question, context=None):
                 }
 
         if "date" in required and date_result["status"] == "none":
-            if session.get("date"):
-                entities["date"] = session["date"]
+            if (
+                session.get("date")
+                or (session.get("start_date") and session.get("end_date"))
+            ):
+                entities["date"] = session.get("date")
                 entities["start_date"] = session.get("start_date")
                 entities["end_date"] = session.get("end_date")
                 results["date"] = {
