@@ -125,7 +125,19 @@ def _calculate_average(records, query_result):
         raise ValueError("The query result does not identify the averaged metric.")
 
     record = records[0]
-    average = record.get(metric)
+    if record.get("_value_count") is not None:
+        value_count = int(record.get("_value_count") or 0)
+        sum_cents = record.get("_sum_cents")
+        if value_count == 0 or sum_cents is None:
+            average = None
+        else:
+            average = (
+                Decimal(str(sum_cents))
+                / (Decimal(value_count) * Decimal("100"))
+            )
+    else:
+        average = record.get(metric)
+
     if average is None:
         return _base_result(
             query_result,
@@ -174,7 +186,19 @@ def _calculate_comparison(records, query_result, question):
     calculated = []
 
     for record in records:
-        value = _round_two(record.get(metric))
+        if record.get("_value_count") is not None:
+            value_count = int(record.get("_value_count") or 0)
+            sum_cents = record.get("_sum_cents")
+            if value_count == 0 or sum_cents is None:
+                continue
+            raw_value = (
+                Decimal(str(sum_cents))
+                / (Decimal(value_count) * Decimal("100"))
+            )
+        else:
+            raw_value = record.get(metric)
+
+        value = _round_two(raw_value)
         if value is None:
             continue
         calculated.append({
