@@ -13,7 +13,6 @@ WEATHER_PATTERNS = (
     r"\brain(?:fall|ing)?\b",
     r"\btemperature\b",
     r"\bhumidity\b",
-    r"\bforecast\b",
     r"\bhot\b",
     r"\bcold\b",
 )
