@@ -615,7 +615,8 @@ INTENT_PATTERNS = {
     ],
     "weather": [
         r"\bweather\b", r"\brain(?:fall|ing)?\b",
-        r"\btemperature\b", r"\bforecast\b"
+        r"\btemperature\b", r"\bhumidity\b",
+        r"\bhot\b", r"\bcold\b"
     ]
 }
 
