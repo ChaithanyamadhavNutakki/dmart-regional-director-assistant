@@ -261,7 +261,7 @@ def _sql_comparison(connection, entities, table, fields):
 
 
 def _sql_inventory(connection, entities, table, fields):
-    """Fetch product records strictly below their reorder threshold."""
+    """Fetch all rows for a product; threshold filtering is calculated downstream."""
 
     product = entities.get("product")
     store = entities.get("store")
@@ -272,7 +272,7 @@ def _sql_inventory(connection, entities, table, fields):
     select_sql = ", ".join(f'"{field}"' for field in selected)
     sql = (
         f'SELECT {select_sql} FROM "{table}" '
-        "WHERE product = ? AND stock_units < reorder_threshold"
+        "WHERE product = ?"
     )
     parameters = [product]
     if store:
