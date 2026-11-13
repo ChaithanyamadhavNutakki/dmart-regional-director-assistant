@@ -72,7 +72,10 @@ def _collect_numeric_values(value, output, field_name=None):
         metric_name = value.get("metric")
         for key, item in value.items():
             # Dates and identifiers are not measured numeric evidence.
-            if key in {"date", "start_date", "end_date", "store_id", "product_id"}:
+            if (
+                key in {"date", "start_date", "end_date", "store_id", "product_id"}
+                or str(key).startswith("_")
+            ):
                 continue
             effective_key = metric_name if key == "average" and metric_name else key
             _collect_numeric_values(item, output, effective_key)
