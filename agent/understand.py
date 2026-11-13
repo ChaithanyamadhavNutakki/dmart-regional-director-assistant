@@ -585,37 +585,37 @@ INTENTS = {
 
 INTENT_PATTERNS = {
     "out_of_scope": [
-        r"\\b(?:reorder|place an order|purchase|buy stock|send (?:an )?(?:email|message| alert)|message the|contact the)\\b",
-        r"\\b(?:change|update|delete|modify)\\b.*\\b(?:record|data|inventory|stock)\\b"
+        r"\b(?:reorder|place an order|purchase|buy stock|send (?:an )?(?:email|message| alert)|message the|contact the)\b",
+        r"\b(?:change|update|delete|modify)\b.*\b(?:record|data|inventory|stock)\b"
     ],
     "diagnostic": [
-        r"\\bwhy\\b", r"\\bwhat caused\\b", r"\\breason for\\b",
-        r"\\broot cause\\b", r"\\btrend\\b", r"\\bexplain (?:the )?(?:increase|decrease|drop|rise|change)\\b",
-        r"\\bwhat is driving\\b", r"\\bdriver(?:s)? of\\b"
+        r"\bwhy\b", r"\bwhat caused\b", r"\breason for\b",
+        r"\broot cause\b", r"\btrend\b", r"\bexplain (?:the )?(?:increase|decrease|drop|rise|change)\b",
+        r"\bwhat is driving\b", r"\bdriver(?:s)? of\b"
     ],
     "inventory": [
-        r"\\binventory\\b", r"\\bstock(?: level| availability| status)?\\b",
-        r"\\b(?:available|remaining) units?\\b", r"\\bproduct\\b",
-        r"\\b(?:out of stock|stockout)\\b"
+        r"\binventory\b", r"\bstock(?: level| availability| status)?\b",
+        r"\b(?:available|remaining) units?\b", r"\bproduct\b",
+        r"\b(?:out of stock|stockout)\b"
     ],
     "feedback": [
-        r"\\bfeedback\\b", r"\\breviews?\\b", r"\\bratings?\\b",
-        r"\\bcustomer sentiment\\b", r"\\bwhat (?:are )?customers saying\\b",
-        r"\\bcustomer comments?\\b"
+        r"\bfeedback\b", r"\breviews?\b", r"\bratings?\b",
+        r"\bcustomer sentiment\b", r"\bwhat (?:are )?customers saying\b",
+        r"\bcustomer comments?\b"
     ],
     "target_vs_actual": [
-        r"\\btarget\\b", r"\\bachievement\\b", r"\\bactual vs\\.? target\\b",
-        r"\\btarget vs\\.? actual\\b", r"\\bmet the target\\b",
-        r"\\bachieved the target\\b", r"\\bperformance band\\b"
+        r"\btarget\b", r"\bachievement\b", r"\bactual vs\.? target\b",
+        r"\btarget vs\.? actual\b", r"\bmet the target\b",
+        r"\bachieved the target\b", r"\bperformance band\b"
     ],
     "comparison": [
-        r"\\bcompare\\b", r"\\bcomparison\\b", r"\\bversus\\b",
-        r"\\bvs\\.?\\b", r"\\bacross (?:all )?stores\\b",
-        r"\\bwhich store\\b", r"\\brank(?:ing)?\\b"
+        r"\bcompare\b", r"\bcomparison\b", r"\bversus\b",
+        r"\bvs\.?\b", r"\bacross (?:all )?stores\b",
+        r"\bwhich store\b", r"\brank(?:ing)?\b"
     ],
     "weather": [
-        r"\\bweather\\b", r"\\brain(?:fall|ing)?\\b",
-        r"\\btemperature\\b", r"\\bforecast\\b"
+        r"\bweather\b", r"\brain(?:fall|ing)?\b",
+        r"\btemperature\b", r"\bforecast\b"
     ]
 }
 
@@ -645,7 +645,7 @@ def find_intent(question, context=None):
         and has_store_or_date
         and not metric_result["status"] == "unsupported"
         and not has_strong_new_intent
-        and not re.search(r"\\b(?:compare|comparison|versus|vs)\\b", text)
+        and not re.search(r"\b(?:compare|comparison|versus|vs)\b", text)
     ):
         return "target_vs_actual"
 
