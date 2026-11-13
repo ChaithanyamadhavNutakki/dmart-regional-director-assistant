@@ -585,7 +585,7 @@ INTENTS = {
 
 INTENT_PATTERNS = {
     "out_of_scope": [
-        r"\b(?:reorder|place an order|purchase|buy stock|send (?:an )?(?:email|message| alert)|message the|contact the)\b",
+        r"\b(?:place an order|purchase|buy stock|send (?:an )?(?:email|message| alert)|message the|contact the)\b",
         r"\b(?:change|update|delete|modify)\b.*\b(?:record|data|inventory|stock)\b"
     ],
     "diagnostic": [
@@ -596,7 +596,8 @@ INTENT_PATTERNS = {
     "inventory": [
         r"\binventory\b", r"\bstock(?: level| availability| status)?\b",
         r"\b(?:available|remaining) units?\b", r"\bproduct\b",
-        r"\b(?:out of stock|stockout)\b"
+        r"\b(?:out of stock|stockout)\b",
+        r"\breorder\s+(?:threshold|level|point)s?\b"
     ],
     "feedback": [
         r"\bfeedback\b", r"\breviews?\b", r"\bratings?\b",
@@ -621,6 +622,18 @@ INTENT_PATTERNS = {
         r"\bhot\b", r"\bcold\b"
     ]
 }
+
+
+def _is_prohibited_order_action(text):
+    """Recognise imperative order/reorder requests, not inventory noun phrases."""
+
+    imperative_patterns = (
+        r"^\s*(?:order|reorder)\b(?!\s+(?:threshold|level|point)\b)",
+        r"\b(?:please|kindly|can you|could you|will you|would you|go ahead and)\s+"
+        r"(?:order|reorder)\b(?!\s+(?:threshold|level|point)\b)",
+        r",\s*(?:order|reorder)\b(?!\s+(?:threshold|level|point)\b)",
+    )
+    return any(re.search(pattern, text) for pattern in imperative_patterns)
 
 
 def find_intent(question, context=None):
@@ -653,7 +666,10 @@ def find_intent(question, context=None):
         return "target_vs_actual"
 
     # 1. Prohibited actions override analytical intent.
-    if any(re.search(p, text) for p in INTENT_PATTERNS["out_of_scope"]):
+    if (
+        _is_prohibited_order_action(text)
+        or any(re.search(p, text) for p in INTENT_PATTERNS["out_of_scope"])
+    ):
         return "out_of_scope"
 
     # 2. Unsupported metrics override approved metric words.
