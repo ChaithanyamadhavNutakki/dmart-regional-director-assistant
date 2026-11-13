@@ -825,8 +825,11 @@ def understand(question, context=None):
                     "status": "context"
                 }
 
-    # Target-vs-actual is defined for one store and one date only.
-    if intent in {"target_vs_actual", "weather"} and date_result["status"] == "range":
+    # Target-vs-actual and weather require one date. This also rejects a
+    # date range inherited from the previous turn in the same session.
+    if intent in {"target_vs_actual", "weather"} and (
+        entities.get("start_date") or entities.get("end_date")
+    ):
         unresolved.append("date")
         entities["date"] = None
         entities["start_date"] = None
