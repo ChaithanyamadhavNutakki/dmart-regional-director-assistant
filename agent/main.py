@@ -72,11 +72,10 @@ def _run_weather(entities: dict[str, Any]) -> dict[str, Any]:
 
     # The weather stub interface is kept deliberately small. A TypeError
     # indicates an incompatible stub contract and is handled as a tool failure.
-    try:
-        result = weather_function(
-            city=entities.get("store"),
-            date=entities.get("date"),
-        )
+    result = weather_function(
+        city=entities.get("store"),
+        date=entities.get("date"),
+    )
 
     if not isinstance(result, dict):
         raise ValueError("The weather stub must return a dictionary.")
