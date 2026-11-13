@@ -34,7 +34,7 @@ The default path is local and does not require an API key or hosted service:
 - Local CSV files and an in-memory SQLite database for data access.
 - `.env` files are ignored by Git and must not be committed.
 
-The optional `WEATHER_MODE=live` branch uses Open-Meteo and requires `requests`. It is not needed for the offline acceptance or evaluation path.
+The optional `WEATHER_MODE=live` branch uses Open-Meteo and requires `requests`. It is not needed for the offline acceptance or evaluation path. Install that optional dependency only when testing live weather: `pip install 'requests>=2.31,<3.0'`.
 
 ## Reproducible run order
 
@@ -114,7 +114,7 @@ The daily store dataset covers 1 April 2026 through 29 June 2026. The assistant 
 
 Only the eleven approved measured fields listed in `docs/requirement.md` may be reported. The assistant is read-only: it does not restock inventory, modify records or send messages. Requests for unsupported metrics or analyst judgement are safely refused or escalated; correlation is not presented as causation.
 
-**Rounding method:** SQL returns non-null counts and integer-cent sums for averages; Python divides using `Decimal` and `ROUND_HALF_UP` to round the result to two decimal places.
+**Rounding method:** SQL returns non-null counts and integer-cent sums for averages; Python divides using `Decimal` and `ROUND_HALF_UP` to round the result to two decimal places. Part A's numeric feature columns and IQR-capped footfall values also use `Decimal` with `ROUND_HALF_UP` to two decimal places.
 
 ## Known limitations
 
