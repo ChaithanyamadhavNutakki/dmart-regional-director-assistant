@@ -208,7 +208,6 @@ def ground(synthesis_result, calculation_result=None, query_result=None,
 
     numeric_sources = {
         "calculation": calculation_result,
-        "query": query_result.get("records", []) if isinstance(query_result, dict) else None,
         "weather": weather_result,
     }
     candidates = []
