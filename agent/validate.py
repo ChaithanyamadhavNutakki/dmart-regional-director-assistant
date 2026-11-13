@@ -352,7 +352,7 @@ def validate(interpretation, selected_route=None):
                 fields=fields,
                 route="none",
             )
-        if not is_range and route != "python":
+        if not is_range and route not in {"python", "python+weather"}:
             return _result(
                 False,
                 "Safe Failure",
