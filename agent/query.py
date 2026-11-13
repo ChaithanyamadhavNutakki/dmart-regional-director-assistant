@@ -219,7 +219,8 @@ def _sql_range_lookup(connection, entities, table, fields):
 
     metric = fields[0]  # Already checked against the approved-field allowlist.
     sql = (
-        f'SELECT store, AVG("{metric}") AS "{metric}" '
+        f'SELECT store, COUNT("{metric}") AS "_value_count", '
+        f'SUM(CAST(ROUND("{metric}" * 100) AS INTEGER)) AS "_sum_cents" '
         f'FROM "{table}" WHERE store = ? AND date BETWEEN ? AND ? '
         "GROUP BY store"
     )
@@ -239,7 +240,8 @@ def _sql_comparison(connection, entities, table, fields):
 
     if start_date and end_date:
         sql = (
-            f'SELECT store, AVG("{metric}") AS "{metric}" '
+            f'SELECT store, COUNT("{metric}") AS "_value_count", '
+            f'SUM(CAST(ROUND("{metric}" * 100) AS INTEGER)) AS "_sum_cents" '
             f'FROM "{table}" WHERE date BETWEEN ? AND ? GROUP BY store'
         )
         parameters = (start_date, end_date)
