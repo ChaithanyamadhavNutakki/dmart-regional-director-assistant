@@ -14,9 +14,9 @@ Expected output:
     "city": "Mumbai",
     "date": "2026-05-15",
     "mode": "stub",
-    "temperature_c": 26,
-    "humidity_pct": 43,
-    "wind_kmh": 10,
+    "temperature_c": 26.0,
+    "humidity_pct": 43.0,
+    "wind_kmh": 10.0,
     "rain_mm": 0.0,
 }
 ```
@@ -33,9 +33,9 @@ Expected output:
     "city": "Pune",
     "date": "2026-05-16",
     "mode": "stub",
-    "temperature_c": 25,
-    "humidity_pct": 88,
-    "wind_kmh": 11,
+    "temperature_c": 25.0,
+    "humidity_pct": 88.0,
+    "wind_kmh": 11.0,
     "rain_mm": 6.5,
 }
 ```
@@ -52,9 +52,9 @@ Expected output:
     "city": "Hyderabad",
     "date": "2026-04-01",
     "mode": "stub",
-    "temperature_c": 30,
-    "humidity_pct": 58,
-    "wind_kmh": 6,
+    "temperature_c": 30.0,
+    "humidity_pct": 58.0,
+    "wind_kmh": 6.0,
     "rain_mm": 0.0,
 }
 ```
@@ -91,9 +91,9 @@ Expected output:
     "city": "Ahmedabad",
     "date": "2026-06-29",
     "mode": "stub",
-    "temperature_c": 29,
-    "humidity_pct": 47,
-    "wind_kmh": 5,
+    "temperature_c": 29.0,
+    "humidity_pct": 47.0,
+    "wind_kmh": 5.0,
     "rain_mm": 6.5,
 }
 ```
