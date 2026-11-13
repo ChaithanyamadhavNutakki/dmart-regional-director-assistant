@@ -186,6 +186,7 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
         if intent == "weather":
             tools_called.append("weather_tool")
             tool_calls += 1
+            executed = "weather_tool"
             try:
                 weather_result = _run_weather(interpretation.get("entities") or {})
                 synthesis_result = synthesize(
@@ -203,10 +204,6 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
             # A Python or SQL route is one data-tool call, irrespective of
             # retries. The weather tool is counted separately when combined.
             tool_calls += 1
-            if selected_route == "python+weather":
-                tools_called.append("weather_tool")
-                tool_calls += 1
-
             simulated_failures = max(
                 0, int(os.getenv("SIMULATE_DB_FAILURES", "0") or "0")
             )
@@ -231,6 +228,8 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
                     last_error = exc
 
             if query_result is None:
+                if selected_route == "python+weather":
+                    actual_route = "python"
                 synthesis_result = _failure_synthesis(
                     "Escalated",
                     "The data query failed after three total attempts. No result has been returned.",
@@ -243,6 +242,8 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
                         question=question,
                     )
                     if selected_route == "python+weather":
+                        tools_called.append("weather_tool")
+                        tool_calls += 1
                         try:
                             weather_result = _run_weather(
                                 interpretation.get("entities") or {}
@@ -273,7 +274,10 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
             query_result=query_result,
             interpretation=interpretation,
             weather_result=weather_result,
-            quoted_constants=[75],
+            quoted_constants=(
+                [75] if "below 75%" in str(synthesis_result.get("answer_text", ""))
+                else []
+            ),
         )
     except Exception:
         grounded_result = {
