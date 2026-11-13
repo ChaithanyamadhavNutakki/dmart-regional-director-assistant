@@ -777,11 +777,12 @@ def understand(question, context=None):
         "date": date_result
     }
 
-    # A recognised but unresolved explicit entity must never be silently
-    # replaced by a value from session context.
+    # Only entities used by this intent can block execution. An irrelevant
+    # unresolved entity must not trigger clarification or affect confidence.
+    required = REQUIRED_ENTITIES[intent]
     unresolved = []
     for name, result in results.items():
-        if _entity_is_unresolved(result):
+        if name in required and _entity_is_unresolved(result):
             unresolved.append(name)
 
     # A date range is represented by start_date/end_date, not date.
@@ -789,7 +790,6 @@ def understand(question, context=None):
     date_explicitly_unresolved = date_result["status"] == "unresolved"
 
     # Context inheritance is limited to entities required by this intent.
-    required = REQUIRED_ENTITIES[intent]
     if intent not in {"unsupported_metric", "diagnostic", "out_of_scope"}:
         if "store" in required and store_result["status"] == "none":
             if session.get("store"):
@@ -861,37 +861,34 @@ def understand(question, context=None):
         else:
             confidence_values.append(result["confidence"])
 
-    # Any explicitly mentioned store is relevant to confidence, even for
-    # intents where a store is optional or not required.
-    if store_result["status"] not in {"none"}:
-        confidence_values.append(store_result["confidence"])
-
     confidence = min(confidence_values) if confidence_values else 1.0
     needs_clarification = bool(missing or unresolved or confidence < 0.7)
 
-    # Update session state only for intents that are not excluded from memory.
+    # Store only resolved entities that this intent actually used.
     if intent not in {"unsupported_metric", "diagnostic", "out_of_scope"}:
-        if store_result["status"] in {"exact", "alias", "fuzzy"}:
-            session["store"] = store_result["store"]
-        elif store_result["status"] in {"unresolved", "ambiguous"}:
-            session.pop("store", None)
+        if "store" in required:
+            if store_result["status"] in {"exact", "alias", "fuzzy"}:
+                session["store"] = store_result["store"]
+            elif store_result["status"] in {"unresolved", "ambiguous"}:
+                session.pop("store", None)
 
-        if intent != "comparison":
+        if "metric" in required:
             if metric_result["status"] == "exact":
                 session["metric"] = metric_result["metric"]
             elif metric_result["status"] == "unsupported":
                 session.pop("metric", None)
 
-        if date_result["status"] in {"exact", "range"}:
-            session["date"] = date_result["date"]
-            session["start_date"] = date_result["start_date"]
-            session["end_date"] = date_result["end_date"]
-        elif date_explicitly_unresolved:
-            session.pop("date", None)
-            session.pop("start_date", None)
-            session.pop("end_date", None)
+        if "date" in required:
+            if date_result["status"] in {"exact", "range"}:
+                session["date"] = date_result["date"]
+                session["start_date"] = date_result["start_date"]
+                session["end_date"] = date_result["end_date"]
+            elif date_explicitly_unresolved:
+                session.pop("date", None)
+                session.pop("start_date", None)
+                session.pop("end_date", None)
 
-        if product_result["status"] == "exact":
+        if "product" in required and product_result["status"] == "exact":
             session["product"] = product_result["product"]
 
         session["last_intent"] = intent
