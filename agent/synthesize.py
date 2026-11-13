@@ -42,7 +42,7 @@ def _status_result(status, answer_text, calculation_result=None):
 
 
 def _synthesize_lookup(result):
-    if not result.get("found"):
+    if not result.get("values", {}).get("found"):
         return _status_result(
             "Safe Failure",
             "No record was found for the requested store and date.",
@@ -138,7 +138,7 @@ def _synthesize_target(result):
 
     answer = (
         f"{store} recorded revenue of {revenue} against a target of {target} "
-        f"on {record_date,}. Achievement was {achievement}; "
+        f"on {record_date}. Achievement was {achievement}; "
         f"the stored performance band was {band}."
     )
 
