@@ -604,9 +604,11 @@ INTENT_PATTERNS = {
         r"\bcustomer comments?\b"
     ],
     "target_vs_actual": [
-        r"\btarget\b", r"\bachievement\b", r"\bactual vs\.? target\b",
-        r"\btarget vs\.? actual\b", r"\bmet the target\b",
-        r"\bachieved the target\b", r"\bperformance band\b"
+        r"\btarget\b.*\b(?:hit|met|meet|miss|missed|beat|exceed|exceeded|achieve|achieved|reach|reached|below|above|against|versus)\b",
+        r"\b(?:hit|met|meet|miss|missed|beat|exceed|exceeded|achieve|achieved|reach|reached|below|above|against|versus)\b.*\btarget\b",
+        r"\bfall short\b", r"\bachievement\b",
+        r"\bactual vs\.? target\b", r"\btarget vs\.? actual\b",
+        r"\bperformance band\b"
     ],
     "comparison": [
         r"\bcompare\b", r"\bcomparison\b", r"\bversus\b",
