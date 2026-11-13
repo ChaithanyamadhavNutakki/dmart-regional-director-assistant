@@ -226,6 +226,7 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
                 0, int(os.getenv("SIMULATE_DB_FAILURES", "0") or "0")
             )
             last_error = None
+            executed = "agent.query.query"
 
             for attempt in range(1, MAX_QUERY_ATTEMPTS + 1):
                 attempts = attempt
@@ -299,7 +300,9 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
         )
     except Exception:
         grounded_result = {
-            **synthesis_result,
+            "status": "Safe Failure",
+            "answer_text": "The response could not be grounded safely and has been withheld.",
+            "calculation_type": None,
             "evidence": [],
             "grounded_values": [],
             "ungrounded_numbers": 0,
