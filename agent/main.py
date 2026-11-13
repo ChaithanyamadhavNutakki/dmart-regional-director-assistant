@@ -41,6 +41,8 @@ def _session_key(user_id: str, session_id: str) -> tuple[str, str]:
 def _load_weather_callable():
     """Resolve the project's weather stub without requiring a live API."""
     candidates = (
+        ("tools.weather", "get_weather"),
+        ("tools.weather", "weather"),
         ("agent.weather_tool", "get_weather"),
         ("agent.weather_tool", "weather"),
         ("weather_tool", "get_weather"),
@@ -80,7 +82,25 @@ def _run_weather(entities: dict[str, Any]) -> dict[str, Any]:
 
     if not isinstance(result, dict):
         raise ValueError("The weather stub must return a dictionary.")
-    return result
+
+    if not result.get("ok"):
+        return {
+            "success": False,
+            "error": result.get("error", "Weather tool failed."),
+            "store": entities.get("store"),
+            "date": entities.get("date"),
+        }
+
+    return {
+        "success": True,
+        "store": result.get("city"),
+        "date": result.get("date"),
+        "temperature_c": result.get("temperature_c"),
+        "humidity_pct": result.get("humidity_pct"),
+        "wind_kmh": result.get("wind_kmh"),
+        "rainfall_mm": result.get("rain_mm"),
+        "mode": result.get("mode"),
+    }
 
 
 def _failure_synthesis(status: str, message: str) -> dict[str, Any]:
