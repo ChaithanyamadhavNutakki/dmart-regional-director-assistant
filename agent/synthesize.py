@@ -258,9 +258,10 @@ def _synthesize_weather(weather_result):
     record_date = weather_result.get("date")
     temperature = weather_result.get("temperature_c")
     humidity = weather_result.get("humidity_pct")
+    wind = weather_result.get("wind_kmh")
     rainfall = weather_result.get("rainfall_mm")
 
-    if any(value is None for value in (store, record_date, temperature, humidity, rainfall)):
+    if any(value is None for value in (store, record_date, temperature, humidity, wind, rainfall)):
         return _status_result(
             "Safe Failure",
             "The weather tool did not return all required weather fields.",
@@ -269,7 +270,8 @@ def _synthesize_weather(weather_result):
     answer = (
         f"Weather for {store} on {record_date}: temperature "
         f"{_number(temperature):.1f} °C, humidity "
-        f"{_number(humidity):.1f}%, rainfall "
+        f"{_number(humidity):.1f}%, wind "
+        f"{_number(wind):.1f} km/h, rainfall "
         f"{_number(rainfall):.1f} mm."
     )
     return _status_result("Answered", answer)
