@@ -21,7 +21,8 @@ from typing import Any
 from agent.understand import understand
 from agent.route import route as select_route
 from agent.validate import validate
-from agent.query import query
+from agent.fetch import fetch
+from agent.answer import answer as build_answer
 from agent.calculate import calculate
 from agent.synthesize import synthesize
 from agent.ground import ground
@@ -223,28 +224,17 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
             simulated_failures = max(
                 0, int(os.getenv("SIMULATE_DB_FAILURES", "0") or "0")
             )
-            last_error = None
-            executed = "agent.query.query"
+            fetch_result = fetch(
+                interpretation,
+                validation,
+                simulated_failures=simulated_failures,
+                max_attempts=MAX_QUERY_ATTEMPTS,
+            )
+            attempts = fetch_result.get("attempts", 0)
+            query_result = fetch_result.get("query_result")
+            executed = fetch_result.get("executed")
 
-            for attempt in range(1, MAX_QUERY_ATTEMPTS + 1):
-                attempts = attempt
-                try:
-                    if attempt <= simulated_failures:
-                        raise RuntimeError("Simulated database failure")
-                    query_result = query(
-                        interpretation,
-                        validation,
-                    )
-                    executed = (
-                        query_result.get("sql")
-                        or f"python:{query_result.get('query_type', 'data_query')}"
-                    )
-                    last_error = None
-                    break
-                except Exception as exc:
-                    last_error = exc
-
-            if query_result is None:
+            if not fetch_result.get("success") or query_result is None:
                 if selected_route == "python+weather":
                     actual_route = "python"
                 synthesis_result = _failure_synthesis(
@@ -285,7 +275,7 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
     # The weather tool may have been unavailable or returned a failure. The
     # data portion of a combined request remains separately grounded.
     try:
-        grounded_result = ground(
+        grounded_result = build_answer(
             synthesis_result=synthesis_result,
             calculation_result=calculation_result,
             query_result=query_result,
