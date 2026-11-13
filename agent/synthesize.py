@@ -317,6 +317,25 @@ def synthesize(calculation_result=None, interpretation=None,
     if intent == "weather":
         return _synthesize_weather(weather_result)
 
+    if weather_result is not None and intent in {"lookup", "target_vs_actual"}:
+        if intent == "lookup":
+            if not isinstance(calculation_result, dict):
+                data_result = _status_result("Safe Failure", "The data lookup result is not available.")
+            elif calculation_result.get("calculation_type") == "average":
+                data_result = _synthesize_average(calculation_result)
+            else:
+                data_result = _synthesize_lookup(calculation_result)
+        else:
+            data_result = _synthesize_target(calculation_result or {})
+
+        weather_text = (
+            _synthesize_weather(weather_result).get("answer_text")
+            if isinstance(weather_result, dict) and weather_result.get("success")
+            else "Weather information could not be retrieved for the requested store and date."
+        )
+        data_result["answer_text"] = data_result.get("answer_text", "") + "\\n" + weather_text
+        return data_result
+
     if intent == "lookup":
         if not isinstance(calculation_result, dict):
             return _status_result(
