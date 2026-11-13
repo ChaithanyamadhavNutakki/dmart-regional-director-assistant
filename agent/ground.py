@@ -35,20 +35,52 @@ def _is_number(value):
     return False
 
 
-def _collect_numeric_values(value, output):
-    """Collect numeric values from structured fetched/calculated payloads."""
+MONEY_FIELDS = {"revenue_inr", "daily_target_inr"}
+TWO_DECIMAL_FIELDS = {
+    "discount_pct", "achievement_pct", "footfall", "stockout_hours",
+    "rating", "average_rating",
+}
+WEATHER_FIELDS = {
+    "temperature_c", "humidity_pct", "wind_kmh", "rain_mm", "rainfall_mm",
+}
+INTEGER_FIELDS = {
+    "stock_units", "reorder_threshold", "rated_rows", "total_rows",
+    "shortage_count", "theme_frequency", "rank",
+}
+
+
+def _format_grounded_token(value, field_name=None):
+    """Format fetched values to the same precision used by answer templates."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value).strip()
+
+    if field_name in MONEY_FIELDS or field_name in TWO_DECIMAL_FIELDS:
+        return f"{number:.2f}"
+    if field_name in WEATHER_FIELDS:
+        return f"{number:.1f}"
+    if field_name in INTEGER_FIELDS:
+        return str(int(number)) if number.is_integer() else str(value).strip()
+    return str(value).strip()
+
+
+def _collect_numeric_values(value, output, field_name=None):
+    """Collect formatted numeric values from structured sources, never answer text."""
 
     if isinstance(value, dict):
+        metric_name = value.get("metric")
         for key, item in value.items():
             # Dates and identifiers are not measured numeric evidence.
             if key in {"date", "start_date", "end_date", "store_id", "product_id"}:
                 continue
-            _collect_numeric_values(item, output)
+            effective_key = metric_name if key == "average" and metric_name else key
+            _collect_numeric_values(item, output, effective_key)
     elif isinstance(value, (list, tuple)):
         for item in value:
-            _collect_numeric_values(item, output)
+            _collect_numeric_values(item, output, field_name)
     elif _is_number(value):
-        token = str(value).strip()
+        token = _format_grounded_token(value, field_name)
         if token not in output:
             output.append(token)
 
@@ -185,7 +217,7 @@ def ground(synthesis_result, calculation_result=None, query_result=None,
     # Keep grounded values in a stable order and avoid duplicates by value.
     grounded_values = []
     for token in candidates:
-        if not any(_numeric_equivalent(token, existing) for existing in grounded_values):
+        if token not in grounded_values:
             grounded_values.append(token)
 
     displayed_numbers = _display_number_tokens(answer_text)
