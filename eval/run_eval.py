@@ -29,6 +29,18 @@ RESULT_FIELDS = [
 ]
 
 
+def _linear_percentile(values, percentile):
+    """Compute a percentile using linear interpolation."""
+    ordered = sorted(float(value) for value in values)
+    if not ordered:
+        return 0.0
+    position = (len(ordered) - 1) * percentile
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    fraction = position - lower
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * fraction
+
+
 def _expected_fragment_matches(answer_text: str, fragment: str) -> bool:
     """Match a required substring; decimal numbers allow a +/- INR 0.01 tolerance."""
     if fragment in answer_text:
@@ -146,33 +158,104 @@ def main():
     if missing_keys:
         raise RuntimeError("Audit records are missing required fields: " + ", ".join(missing_keys))
 
-    if sum(int(row["ungrounded_numbers"]) for row in rows) != 0:
+    # The complete metric summary is printed from the same measured run.
+    paired = list(zip(cases, audit_records))
+    passed = sum(bool(row["passed"]) for row in rows)
+    total = len(rows)
+    latencies = [float(row["latency_ms"] or 0) for row in rows]
+    token_counts = [int(row["tokens_est"] or 0) for row in rows]
+    ungrounded_total = sum(int(row["ungrounded_numbers"] or 0) for row in rows)
+    budget_total = sum(bool(row["budget_exceeded"]) for row in rows)
+    tool_calls_total = sum(int(row["tool_calls"] or 0) for row in rows)
+
+    category_summary = {}
+    for row in rows:
+        item = category_summary.setdefault(row["category"], {"passed": 0, "total": 0})
+        item["total"] += 1
+        item["passed"] += int(bool(row["passed"]))
+
+    gate_categories = {
+        "unsupported_metric", "out_of_scope", "out_of_range_date",
+        "injection", "ambiguity", "unresolved_store", "unresolved_date",
+    }
+    gate_rows = [row for row in rows if row["category"] in gate_categories]
+    safety_rows = [
+        row for row in rows
+        if row["category"] in {"injection", "unsupported_metric", "out_of_scope"}
+    ]
+    non_answer_statuses = {
+        "Safe Failure", "Escalated", "Clarification Needed"
+    }
+    non_answer_inr = sum(
+        1 for case, record in paired
+        if record.get("status") in non_answer_statuses
+        and re.search(r"\\bINR\\s+-?\\d", str(record.get("answer_text", "")))
+    )
+    gitignore_path = ROOT / ".gitignore"
+    env_ignored = (
+        gitignore_path.is_file()
+        and ".env" in {
+            line.strip() for line in gitignore_path.read_text(encoding="utf-8").splitlines()
+        }
+    )
+    r01_record = next(
+        (record for case, record in paired if case["case_id"] == "R01"),
+        None,
+    )
+
+    if ungrounded_total:
         print("WARNING: one or more replies contain ungrounded numbers.")
-    if sum(bool(row["budget_exceeded"]) for row in rows):
+    if budget_total:
         print("WARNING: one or more replies exceed the token budget.")
 
-    passed = sum(bool(row["passed"]) for row in rows)
     print("Part D evaluation complete")
-    print("Cases:", len(rows))
-    print("Passed:", passed)
-    print("Failed:", len(rows) - passed)
-    print("Pass rate: {:.2f}%".format(100.0 * passed / len(rows)))
+    print("Cases: {} | Passed: {} | Failed: {}".format(total, passed, total - passed))
+    print("Pass rate: {:.2f}%".format(100.0 * passed / total))
     print("Audit records:", len(audit_records))
-    print("Ungrounded numbers:", sum(int(row["ungrounded_numbers"]) for row in rows))
-    print("Budget breaches:", sum(bool(row["budget_exceeded"]) for row in rows))
-    print("Total tool calls:", sum(int(row["tool_calls"]) for row in rows))
+    print("Cost — mean tokens: {:.2f} | max tokens: {}".format(
+        sum(token_counts) / total, max(token_counts)
+    ))
+    print("Cost — total tool calls: {} | budget breaches: {}".format(
+        tool_calls_total, budget_total
+    ))
+    print("Latency — mean ms: {:.3f} | p90 ms (linear): {:.3f} | max ms: {:.3f}".format(
+        sum(latencies) / total, _linear_percentile(latencies, 0.90), max(latencies)
+    ))
+    print("Quality — ungrounded numbers:", ungrounded_total)
+    print("Safety — injection/unsupported_metric/out_of_scope: {}/{} passed".format(
+        sum(int(bool(row["passed"])) for row in safety_rows), len(safety_rows)
+    ))
+    print("Safety — non-answer replies with INR figures:", non_answer_inr)
+    print("Safety — .gitignore lists .env:", "YES" if env_ignored else "NO")
+    print("Release-gate categories: {}/{} passed".format(
+        sum(int(bool(row["passed"])) for row in gate_rows), len(gate_rows)
+    ))
+    print("Pass counts by category:")
+    for category in sorted(category_summary):
+        item = category_summary[category]
+        print("  {}: {}/{}".format(category, item["passed"], item["total"]))
+    if r01_record:
+        print("R01 full-period reconciliation answer:")
+        print(r01_record.get("answer_text", ""))
     print("Results:", RESULTS_PATH.relative_to(ROOT))
     print("Audit:", LOG_PATH.relative_to(ROOT))
-    print("\nCase failures:")
+    print("\\nCase failures:")
+    record_by_case = {
+        case["case_id"]: record for case, record in paired
+    }
     for row in rows:
         if not row["passed"]:
+            record = record_by_case.get(row["case_id"], {})
             print(
                 row["case_id"],
-                "expected={}/{}".format(row["expected_status"], row["category"]),
+                "category={}".format(row["category"]),
+                "expected={}".format(row["expected_status"]),
                 "actual={}".format(row["actual_status"]),
                 "intent_match={}".format(row["intent_match"]),
                 "contains_match={}".format(row["contains_match"]),
+                "answer={!r}".format(record.get("answer_text", "")),
             )
+
 
 
 if __name__ == "__main__":
