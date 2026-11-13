@@ -564,3 +564,346 @@ def find_date(question):
         "confidence": 0.4,
         "status": "unresolved"
     }
+
+
+
+# ==========================================
+# INTENT CLASSIFICATION AND ENTITY RESOLUTION
+# ==========================================
+
+INTENTS = {
+    "lookup",
+    "target_vs_actual",
+    "comparison",
+    "inventory",
+    "feedback",
+    "weather",
+    "unsupported_metric",
+    "out_of_scope",
+    "diagnostic"
+}
+
+INTENT_PATTERNS = {
+    "out_of_scope": [
+        r"\\b(?:reorder|place an order|purchase|buy stock|send (?:an )?(?:email|message| alert)|message the|contact the)\\b",
+        r"\\b(?:change|update|delete|modify)\\b.*\\b(?:record|data|inventory|stock)\\b"
+    ],
+    "diagnostic": [
+        r"\\bwhy\\b", r"\\bwhat caused\\b", r"\\breason for\\b",
+        r"\\broot cause\\b", r"\\btrend\\b", r"\\bexplain (?:the )?(?:increase|decrease|drop|rise|change)\\b",
+        r"\\bwhat is driving\\b", r"\\bdriver(?:s)? of\\b"
+    ],
+    "inventory": [
+        r"\\binventory\\b", r"\\bstock(?: level| availability| status)?\\b",
+        r"\\b(?:available|remaining) units?\\b", r"\\bproduct\\b",
+        r"\\b(?:out of stock|stockout)\\b"
+    ],
+    "feedback": [
+        r"\\bfeedback\\b", r"\\breviews?\\b", r"\\bratings?\\b",
+        r"\\bcustomer sentiment\\b", r"\\bwhat (?:are )?customers saying\\b",
+        r"\\bcustomer comments?\\b"
+    ],
+    "target_vs_actual": [
+        r"\\btarget\\b", r"\\bachievement\\b", r"\\bactual vs\\.? target\\b",
+        r"\\btarget vs\\.? actual\\b", r"\\bmet the target\\b",
+        r"\\bachieved the target\\b", r"\\bperformance band\\b"
+    ],
+    "comparison": [
+        r"\\bcompare\\b", r"\\bcomparison\\b", r"\\bversus\\b",
+        r"\\bvs\\.?\\b", r"\\bacross (?:all )?stores\\b",
+        r"\\bwhich store\\b", r"\\brank(?:ing)?\\b"
+    ],
+    "weather": [
+        r"\\bweather\\b", r"\\brain(?:fall|ing)?\\b",
+        r"\\btemperature\\b", r"\\bforecast\\b"
+    ]
+}
+
+
+def find_intent(question, context=None):
+    """Classifies a question using the agreed intent precedence."""
+
+    text = question.lower().strip()
+    metric_result = find_metric(question)
+
+    # A target-check follow-up can consist only of a new store or date.
+    previous_target = bool(
+        context and context.get("target_followup")
+    )
+    has_store_or_date = (
+        find_store(question)["status"] != "none"
+        or find_date(question)["status"] != "none"
+    )
+    has_strong_new_intent = any(
+        re.search(pattern, text)
+        for intent, patterns in INTENT_PATTERNS.items()
+        if intent not in {"target_vs_actual", "comparison"}
+        for pattern in patterns
+    )
+    if (
+        previous_target
+        and has_store_or_date
+        and not metric_result["status"] == "unsupported"
+        and not has_strong_new_intent
+        and not re.search(r"\\b(?:compare|comparison|versus|vs)\\b", text)
+    ):
+        return "target_vs_actual"
+
+    # 1. Prohibited actions override analytical intent.
+    if any(re.search(p, text) for p in INTENT_PATTERNS["out_of_scope"]):
+        return "out_of_scope"
+
+    # 2. Unsupported metrics override approved metric words.
+    if metric_result["status"] == "unsupported":
+        return "unsupported_metric"
+
+    # 3. Diagnostic questions.
+    if any(re.search(p, text) for p in INTENT_PATTERNS["diagnostic"]):
+        return "diagnostic"
+
+    # 4-7. Domain-specific intents.
+    for intent in (
+        "inventory", "feedback", "target_vs_actual", "comparison"
+    ):
+        if any(re.search(p, text) for p in INTENT_PATTERNS[intent]):
+            return intent
+
+    # 8. A recognised metric indicates a lookup.
+    if metric_result["metric"] is not None:
+        return "lookup"
+
+    # 9. Weather.
+    if any(re.search(p, text) for p in INTENT_PATTERNS["weather"]):
+        return "weather"
+
+    # 10. A named store/date without a metric is treated as a lookup.
+    store_result = find_store(question)
+    date_result = find_date(question)
+    if (
+        store_result["status"] != "none"
+        or date_result["status"] != "none"
+    ):
+        return "lookup"
+
+    return "out_of_scope"
+
+
+REQUIRED_ENTITIES = {
+    "lookup": ("store", "metric", "date"),
+    "target_vs_actual": ("store", "date"),
+    "comparison": ("metric", "date"),
+    "inventory": ("product",),
+    "feedback": ("store",),
+    "weather": ("store", "date"),
+    "unsupported_metric": (),
+    "out_of_scope": (),
+    "diagnostic": ()
+}
+
+
+def _entity_is_unresolved(result):
+    return result.get("status") in {"unresolved", "ambiguous"}
+
+
+def _clarification_for(missing, unresolved):
+    """Builds a concise clarification prompt from missing entities."""
+    parts = []
+
+    if "store" in unresolved:
+        parts.append("the store name")
+    elif "store" in missing:
+        parts.append("a store")
+
+    if "metric" in missing:
+        parts.append("the metric (for example, revenue or footfall)")
+    if "date" in unresolved:
+        parts.append("a supported date or date range")
+    elif "date" in missing:
+        parts.append("a date or date range")
+    if "product" in unresolved:
+        parts.append("the product name")
+    elif "product" in missing:
+        parts.append("a product name")
+
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return "Please clarify " + parts[0] + "."
+    return "Please clarify " + ", ".join(parts[:-1]) + " and " + parts[-1] + "."
+
+
+def understand(question, context=None):
+    """
+    Interprets a question and resolves the entities required by its intent.
+
+    Context is a mutable dictionary scoped to one conversation/session.
+    The returned context should be passed to the next call in that session.
+    """
+
+    if not isinstance(question, str) or not question.strip():
+        return {
+            "intent": "out_of_scope",
+            "entities": {},
+            "missing_entities": [],
+            "unresolved_entities": [],
+            "confidence": 1.0,
+            "needs_clarification": False,
+            "clarification_question": None,
+            "context": dict(context or {})
+        }
+
+    session = dict(context or {})
+    intent = find_intent(question, session)
+
+    store_result = find_store(question)
+    product_result = find_product(question)
+    metric_result = find_metric(question)
+    date_result = find_date(question)
+
+    entities = {
+        "store": store_result["store"],
+        "product": product_result["product"],
+        "metric": metric_result["metric"],
+        "date": date_result["date"],
+        "start_date": date_result["start_date"],
+        "end_date": date_result["end_date"]
+    }
+
+    results = {
+        "store": store_result,
+        "product": product_result,
+        "metric": metric_result,
+        "date": date_result
+    }
+
+    # A recognised but unresolved explicit entity must never be silently
+    # replaced by a value from session context.
+    unresolved = []
+    for name, result in results.items():
+        if _entity_is_unresolved(result):
+            unresolved.append(name)
+
+    # A date range is represented by start_date/end_date, not date.
+    date_present = date_result["status"] in {"exact", "range"}
+    date_explicitly_unresolved = date_result["status"] == "unresolved"
+
+    # Context inheritance is limited to entities required by this intent.
+    required = REQUIRED_ENTITIES[intent]
+    if intent not in {"unsupported_metric", "diagnostic", "out_of_scope"}:
+        if "store" in required and store_result["status"] == "none":
+            if session.get("store"):
+                entities["store"] = session["store"]
+                results["store"] = {
+                    "store": session["store"],
+                    "confidence": 1.0,
+                    "status": "context"
+                }
+
+        if "metric" in required and metric_result["status"] == "none":
+            if session.get("metric"):
+                entities["metric"] = session["metric"]
+                results["metric"] = {
+                    "metric": session["metric"],
+                    "confidence": 1.0,
+                    "status": "context"
+                }
+
+        if "date" in required and date_result["status"] == "none":
+            if session.get("date"):
+                entities["date"] = session["date"]
+                entities["start_date"] = session.get("start_date")
+                entities["end_date"] = session.get("end_date")
+                results["date"] = {
+                    "date": session["date"],
+                    "start_date": session.get("start_date"),
+                    "end_date": session.get("end_date"),
+                    "confidence": 1.0,
+                    "status": "context"
+                }
+
+    # Target-vs-actual is defined for one store and one date only.
+    if intent in {"target_vs_actual", "weather"} and date_result["status"] == "range":
+        unresolved.append("date")
+        entities["date"] = None
+        entities["start_date"] = None
+        entities["end_date"] = None
+        results["date"] = {
+            "date": None, "start_date": None, "end_date": None,
+            "confidence": 0.4, "status": "unresolved"
+        }
+
+    # Required fields not supplied or inherited are missing.
+    missing = []
+    for name in required:
+        if name == "date":
+            if not entities.get("date") and not (
+                entities.get("start_date") and entities.get("end_date")
+            ) and "date" not in unresolved:
+                missing.append("date")
+        elif not entities.get(name) and name not in unresolved:
+            missing.append(name)
+
+    # Comparison is across stores; it must not inherit a store.
+    if intent == "comparison":
+        entities["store"] = None
+
+    # An explicitly unresolved entity blocks context fallback and clarification.
+    unresolved = list(dict.fromkeys(unresolved))
+    confidence_values = []
+    for name in required:
+        result = results[name]
+        if name == "date" and result["status"] == "range":
+            confidence_values.append(result["confidence"])
+        elif result["status"] == "none":
+            # Missing required entities are assigned the clarification floor.
+            confidence_values.append(0.4 if name in missing else 1.0)
+        else:
+            confidence_values.append(result["confidence"])
+
+    # Any explicitly mentioned store is relevant to confidence, even for
+    # intents where a store is optional or not required.
+    if store_result["status"] not in {"none"}:
+        confidence_values.append(store_result["confidence"])
+
+    confidence = min(confidence_values) if confidence_values else 1.0
+    needs_clarification = bool(missing or unresolved or confidence < 0.7)
+
+    # Update session state only for intents that are not excluded from memory.
+    if intent not in {"unsupported_metric", "diagnostic", "out_of_scope"}:
+        if store_result["status"] in {"exact", "alias", "fuzzy"}:
+            session["store"] = store_result["store"]
+        elif store_result["status"] in {"unresolved", "ambiguous"}:
+            session.pop("store", None)
+
+        if intent != "comparison":
+            if metric_result["status"] == "exact":
+                session["metric"] = metric_result["metric"]
+            elif metric_result["status"] == "unsupported":
+                session.pop("metric", None)
+
+        if date_result["status"] in {"exact", "range"}:
+            session["date"] = date_result["date"]
+            session["start_date"] = date_result["start_date"]
+            session["end_date"] = date_result["end_date"]
+        elif date_explicitly_unresolved:
+            session.pop("date", None)
+            session.pop("start_date", None)
+            session.pop("end_date", None)
+
+        if product_result["status"] == "exact":
+            session["product"] = product_result["product"]
+
+        session["last_intent"] = intent
+        session["target_followup"] = intent == "target_vs_actual"
+
+    return {
+        "intent": intent,
+        "entities": entities,
+        "missing_entities": missing,
+        "unresolved_entities": unresolved,
+        "confidence": round(confidence, 2),
+        "needs_clarification": needs_clarification,
+        "clarification_question": _clarification_for(missing, unresolved)
+            if needs_clarification else None,
+        "context": session
+    }
