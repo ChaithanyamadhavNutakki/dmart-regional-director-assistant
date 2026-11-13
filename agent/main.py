@@ -16,7 +16,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from agent.understand import understand
 from agent.route import route as select_route
@@ -120,7 +120,7 @@ def _log_record(
     question: str,
     interpretation: dict[str, Any],
     route_name: str,
-    executed: str | None,
+    executed: Optional[str],
     attempts: int,
     tools_called: list[str],
     grounded_result: dict[str, Any],
