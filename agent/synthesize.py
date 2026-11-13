@@ -335,7 +335,7 @@ def synthesize(calculation_result=None, interpretation=None,
             if isinstance(weather_result, dict) and weather_result.get("success")
             else "Weather information could not be retrieved for the requested store and date."
         )
-        data_result["answer_text"] = data_result.get("answer_text", "") + "\\n" + weather_text
+        data_result["answer_text"] = data_result.get("answer_text", "") + "\n" + weather_text
         return data_result
 
     if intent == "lookup":
