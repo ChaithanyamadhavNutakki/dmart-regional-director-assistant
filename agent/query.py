@@ -270,11 +270,15 @@ def _sql_inventory(connection, entities, table, fields):
 
     selected = ["store", "product"] + fields
     select_sql = ", ".join(f'"{field}"' for field in selected)
+    # The interpreter resolves canonical product names (for example,
+    # "Amul Milk"), while inventory.csv stores descriptive labels with pack
+    # sizes (for example, "Amul Milk 1L"). Match the canonical name exactly
+    # or as the beginning of a product label followed by a space.
     sql = (
         f'SELECT {select_sql} FROM "{table}" '
-        "WHERE product = ?"
+        "WHERE product = ? OR product LIKE ?"
     )
-    parameters = [product]
+    parameters = [product, product + " %"]
     if store:
         sql += " AND store = ?"
         parameters.append(store)
