@@ -253,11 +253,6 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
                 )
             else:
                 try:
-                    calculation_result = calculate(
-                        query_result,
-                        interpretation=interpretation,
-                        question=question,
-                    )
                     if selected_route == "python+weather":
                         tools_called.append("weather_tool")
                         tool_calls += 1
@@ -270,6 +265,11 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
                                 "success": False,
                                 "error": str(exc),
                             }
+                    calculation_result = calculate(
+                        query_result,
+                        interpretation=interpretation,
+                        question=question,
+                    )
                     synthesis_result = synthesize(
                         calculation_result=calculation_result,
                         interpretation=interpretation,
