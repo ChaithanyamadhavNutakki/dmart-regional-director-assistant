@@ -691,6 +691,24 @@ def find_intent(question, context=None):
     return "out_of_scope"
 
 
+WEATHER_WORD_PATTERNS = (
+    r"\bweather\b",
+    r"\brain(?:fall|ing)?\b",
+    r"\btemperature\b",
+    r"\bhumidity\b",
+    r"\bhot\b",
+    r"\bcold\b",
+)
+
+
+def weather_requested(question):
+    """Return whether the question contains a weather keyword."""
+    return isinstance(question, str) and any(
+        re.search(pattern, question, re.IGNORECASE)
+        for pattern in WEATHER_WORD_PATTERNS
+    )
+
+
 REQUIRED_ENTITIES = {
     "lookup": ("store", "metric", "date"),
     "target_vs_actual": ("store", "date"),
@@ -746,6 +764,7 @@ def understand(question, context=None):
     if not isinstance(question, str) or not question.strip():
         return {
             "intent": "out_of_scope",
+            "weather_requested": False,
             "entities": {},
             "missing_entities": [],
             "unresolved_entities": [],
@@ -904,6 +923,7 @@ def understand(question, context=None):
 
     return {
         "intent": intent,
+        "weather_requested": weather_requested(question),
         "entities": entities,
         "missing_entities": missing,
         "unresolved_entities": unresolved,
