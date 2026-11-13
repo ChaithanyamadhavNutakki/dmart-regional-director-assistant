@@ -293,7 +293,7 @@ def handle(question, session_id, user_id=DEFAULT_USER_ID):
             interpretation=interpretation,
             weather_result=weather_result,
             quoted_constants=(
-                [75] if "below 75%" in str(synthesis_result.get("answer_text", ""))
+                ["75.00"] if "below 75.00%" in str(synthesis_result.get("answer_text", ""))
                 else []
             ),
         )
