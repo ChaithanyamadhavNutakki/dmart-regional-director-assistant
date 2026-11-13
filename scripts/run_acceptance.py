@@ -38,6 +38,15 @@ CASES = [
     ("A20", "s13", "What was Pune's revenue on 15 May 2026?", 3),
 ]
 
+EXPECTED_ROUTE = {
+    "A01": "python", "A02": "python", "A03": "python",
+    "A04": "none", "A05": "python", "A06": "python",
+    "A07": "python", "A08": "python", "A09": "python",
+    "A10": "sql", "A11": "sql", "A12": "sql", "A13": "sql",
+    "A14": "none", "A15": "none", "A16": "none",
+    "A17": "none", "A18": "none", "A19": "python", "A20": "python",
+}
+
 EXPECTED = {
     "A01": ("Answered", "lookup", ["INR 623845.00"]),
     "A02": ("Answered", "lookup", ["Pune", "2026-05-15", "INR 900000.00"]),
@@ -106,6 +115,9 @@ def main():
             "intent": result.get("intent") == expected_intent,
             "content": all(part.casefold() in answer.casefold() for part in required_content),
             "grounding": result.get("ungrounded_numbers") == 0,
+            "route": result.get("route") == EXPECTED_ROUTE[case_id],
+            "tool_calls": result.get("tool_calls") == (1 if EXPECTED_ROUTE[case_id] != "none" else 0),
+            "tools_called": result.get("tools_called") == [],
         }
 
         if case_id == "A04":
