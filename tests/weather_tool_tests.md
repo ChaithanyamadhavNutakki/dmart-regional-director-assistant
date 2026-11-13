@@ -1,101 +1,85 @@
-# Weather tool checks
+# Weather tool tests
 
-The default mode is `WEATHER_MODE=stub`. These cases use the deterministic formula specified in the capstone brief.
+Observed outputs from scripts/run_weather_tests.py using WEATHER_MODE=stub.
 
-## Case 1 — Mumbai reference output
+## Case 1 — Mumbai reference output — PASS
+Input: get_weather('Mumbai', '2026-05-15')
 
-Input: `get_weather("Mumbai", "2026-05-15")`
-
-Expected output:
-
-```python
-{
-    "ok": True,
-    "city": "Mumbai",
-    "date": "2026-05-15",
-    "mode": "stub",
-    "temperature_c": 26.0,
-    "humidity_pct": 43.0,
-    "wind_kmh": 10.0,
-    "rain_mm": 0.0,
-}
-```
-
-## Case 2 — Pune reference output
-
-Input: `get_weather("Pune", "2026-05-16")`
-
-Expected output:
+Observed output:
 
 ```python
-{
-    "ok": True,
-    "city": "Pune",
-    "date": "2026-05-16",
-    "mode": "stub",
-    "temperature_c": 25.0,
-    "humidity_pct": 88.0,
-    "wind_kmh": 11.0,
-    "rain_mm": 6.5,
-}
+{'ok': True,
+ 'city': 'Mumbai',
+ 'date': '2026-05-15',
+ 'mode': 'stub',
+ 'temperature_c': 26.0,
+ 'humidity_pct': 43.0,
+ 'wind_kmh': 10.0,
+ 'rain_mm': 0.0}
 ```
 
-## Case 3 — Hyderabad reference output
+## Case 2 — Pune reference output — PASS
+Input: get_weather('Pune', '2026-05-16')
 
-Input: `get_weather("Hyderabad", "2026-04-01")`
-
-Expected output:
+Observed output:
 
 ```python
-{
-    "ok": True,
-    "city": "Hyderabad",
-    "date": "2026-04-01",
-    "mode": "stub",
-    "temperature_c": 30.0,
-    "humidity_pct": 58.0,
-    "wind_kmh": 6.0,
-    "rain_mm": 0.0,
-}
+{'ok': True,
+ 'city': 'Pune',
+ 'date': '2026-05-16',
+ 'mode': 'stub',
+ 'temperature_c': 25.0,
+ 'humidity_pct': 88.0,
+ 'wind_kmh': 11.0,
+ 'rain_mm': 6.5}
 ```
 
-## Case 4 — Unsupported city
+## Case 3 — Hyderabad reference output — PASS
+Input: get_weather('Hyderabad', '2026-04-01')
 
-Input: `get_weather("Kolkata", "2026-05-15")`
-
-Expected output:
+Observed output:
 
 ```python
-{"ok": False, "error": "unsupported city: Kolkata"}
+{'ok': True,
+ 'city': 'Hyderabad',
+ 'date': '2026-04-01',
+ 'mode': 'stub',
+ 'temperature_c': 30.0,
+ 'humidity_pct': 58.0,
+ 'wind_kmh': 6.0,
+ 'rain_mm': 0.0}
 ```
 
-## Case 5 — Invalid calendar date
+## Case 4 — Unsupported city — PASS
+Input: get_weather('Kolkata', '2026-05-15')
 
-Input: `get_weather("Pune", "2026-02-30")`
-
-Expected output:
+Observed output:
 
 ```python
-{"ok": False, "error": "invalid date: 2026-02-30"}
+{'ok': False, 'error': 'unsupported city: Kolkata'}
 ```
 
-## Case 6 — Additional supported city/date
+## Case 5 — Invalid calendar date — PASS
+Input: get_weather('Pune', '2026-02-30')
 
-Input: `get_weather("Ahmedabad", "2026-06-29")`
-
-Expected output:
+Observed output:
 
 ```python
-{
-    "ok": True,
-    "city": "Ahmedabad",
-    "date": "2026-06-29",
-    "mode": "stub",
-    "temperature_c": 29.0,
-    "humidity_pct": 47.0,
-    "wind_kmh": 5.0,
-    "rain_mm": 6.5,
-}
+{'ok': False, 'error': 'invalid date: 2026-02-30'}
 ```
 
-These are expected outputs derived from the stub formula. They are not presented as runtime test results; the consolidated integration run will verify them.
+## Case 6 — Additional supported city/date — PASS
+Input: get_weather('Ahmedabad', '2026-06-29')
+
+Observed output:
+
+```python
+{'ok': True,
+ 'city': 'Ahmedabad',
+ 'date': '2026-06-29',
+ 'mode': 'stub',
+ 'temperature_c': 29.0,
+ 'humidity_pct': 47.0,
+ 'wind_kmh': 5.0,
+ 'rain_mm': 6.5}
+```
