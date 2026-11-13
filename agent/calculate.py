@@ -263,10 +263,10 @@ def _calculate_inventory(records, query_result):
         found=True,
         below_threshold=below_threshold,
         shortage_count=len(below_threshold),
-        no_shortage=not below_threshold,
+        no_shortage=bool(records) and not below_threshold,
         message=(
             "No stores are below the reorder threshold for this product."
-            if not below_threshold else None
+            if records and not below_threshold else None
         ),
     )
 
