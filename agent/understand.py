@@ -713,7 +713,7 @@ def _clarification_for(missing, unresolved):
     parts = []
 
     if "store" in unresolved:
-        parts.append("the store name")
+        parts.append("the store name (Mumbai, Pune, Hyderabad, Bengaluru or Ahmedabad)")
     elif "store" in missing:
         parts.append("a store")
 
@@ -820,7 +820,7 @@ def understand(question, context=None):
                 entities["start_date"] = session.get("start_date")
                 entities["end_date"] = session.get("end_date")
                 results["date"] = {
-                    "date": session["date"],
+                    "date": session.get("date"),
                     "start_date": session.get("start_date"),
                     "end_date": session.get("end_date"),
                     "confidence": 1.0,
