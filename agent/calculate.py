@@ -245,8 +245,8 @@ def _calculate_inventory(records, query_result):
         if stock is None or threshold is None:
             continue
 
-        # The query already filters strictly below threshold. Recheck here
-        # defensively so equality can never be reported as a shortage.
+        # Apply the strict threshold rule after retrieval; equality is not
+        # a shortage.
         if stock < threshold:
             below_threshold.append({
                 "store": record.get("store"),
@@ -260,7 +260,7 @@ def _calculate_inventory(records, query_result):
     return _base_result(
         query_result,
         "inventory",
-        found=True,
+        found=bool(records),
         below_threshold=below_threshold,
         shortage_count=len(below_threshold),
         no_shortage=bool(records) and not below_threshold,
